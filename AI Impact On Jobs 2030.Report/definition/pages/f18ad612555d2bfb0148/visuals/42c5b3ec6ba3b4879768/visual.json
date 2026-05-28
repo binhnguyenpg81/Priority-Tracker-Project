@@ -3,7 +3,7 @@
   "name": "42c5b3ec6ba3b4879768",
   "position": {
     "x": 0,
-    "y": 61.11405835543767,
+    "y": 82.617152961980551,
     "z": 0,
     "height": 439.11582670203364,
     "width": 1280
@@ -120,6 +120,28 @@
               "expr": {
                 "Literal": {
                   "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'AI Replacement Risk by Job Title'"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'center'"
                 }
               }
             }
