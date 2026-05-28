@@ -1,0 +1,193 @@
+table AI_Impact_on_Jobs_2030
+	lineageTag: 45ffd964-9eb9-41ea-a680-79fc4d885233
+
+	column Employee_ID
+		dataType: string
+		lineageTag: a1da318a-28c1-4df5-ace3-702b3a457314
+		summarizeBy: none
+		sourceColumn: Employee_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Job_Title
+		dataType: string
+		lineageTag: 06d70cb1-efd7-47a1-9339-39d04edd9e35
+		summarizeBy: none
+		sourceColumn: Job_Title
+
+		annotation SummarizationSetBy = Automatic
+
+	column Industry
+		dataType: string
+		lineageTag: 52d9648e-ab74-454a-8b30-5f096798abc8
+		summarizeBy: none
+		sourceColumn: Industry
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: 291477eb-5318-4fd9-8a4b-9fa7bf609053
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	column Education_Level
+		dataType: string
+		lineageTag: 18638f28-b347-489c-9629-dce9b607e3d4
+		summarizeBy: none
+		sourceColumn: Education_Level
+
+		annotation SummarizationSetBy = Automatic
+
+	column Years_Experience
+		dataType: double
+		lineageTag: 9eec95bf-d6ae-4d57-a9bd-174ef93358b7
+		summarizeBy: sum
+		sourceColumn: Years_Experience
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AI_Replacement_Risk
+		dataType: double
+		lineageTag: 63c009fa-4b07-4da8-98eb-12cf2484a626
+		summarizeBy: sum
+		sourceColumn: AI_Replacement_Risk
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Future_Demand_Score
+		dataType: double
+		lineageTag: fc341e68-655e-4c94-8c12-5da20e04ecf8
+		summarizeBy: sum
+		sourceColumn: Future_Demand_Score
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Remote_Work_Possibility
+		dataType: string
+		lineageTag: 8db6007f-cc4b-4e8e-96d5-2e8e31f18adc
+		summarizeBy: none
+		sourceColumn: Remote_Work_Possibility
+
+		annotation SummarizationSetBy = Automatic
+
+	column Average_Salary_USD
+		dataType: double
+		lineageTag: 2cb5476e-b5e4-46ce-a6e6-36a78847bf71
+		summarizeBy: sum
+		sourceColumn: Average_Salary_USD
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Required_Skills
+		dataType: string
+		lineageTag: 62b58e15-e7c8-424c-8c1e-7c46baf955f6
+		summarizeBy: none
+		sourceColumn: Required_Skills
+
+		annotation SummarizationSetBy = Automatic
+
+	column Automation_Level
+		dataType: string
+		lineageTag: 198dc359-7936-41d6-9c25-acbb15a69320
+		summarizeBy: none
+		sourceColumn: Automation_Level
+
+		annotation SummarizationSetBy = Automatic
+
+	column Job_Growth_2030
+		dataType: double
+		lineageTag: b5ef09cb-468c-4538-a835-2e75e4a29302
+		summarizeBy: sum
+		sourceColumn: Job_Growth_2030
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Work_Hours_Per_Week
+		dataType: double
+		lineageTag: cf210cb4-fc64-4968-9917-7f971cb72511
+		summarizeBy: sum
+		sourceColumn: Work_Hours_Per_Week
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Company_Size
+		dataType: string
+		lineageTag: 79a14a57-2331-4ada-b096-e0e49b056658
+		summarizeBy: none
+		sourceColumn: Company_Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column AI_Tool_Usage
+		dataType: string
+		lineageTag: 4cdd00f9-ccd6-4a34-9eb6-ecd93914f3a3
+		summarizeBy: none
+		sourceColumn: AI_Tool_Usage
+
+		annotation SummarizationSetBy = Automatic
+
+	column Performance_Score
+		dataType: double
+		lineageTag: b0b9a1c2-e26d-4259-a76d-b607096d263c
+		summarizeBy: sum
+		sourceColumn: Performance_Score
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Upskilling_Needed
+		dataType: string
+		lineageTag: 4559b077-8a0b-4650-9208-545bf949766d
+		summarizeBy: none
+		sourceColumn: Upskilling_Needed
+
+		annotation SummarizationSetBy = Automatic
+
+	column Job_Satisfaction
+		dataType: double
+		lineageTag: f33f1264-2efe-4679-bae0-b1652b82482a
+		summarizeBy: sum
+		sourceColumn: Job_Satisfaction
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Hiring_Trend_2026
+		dataType: string
+		lineageTag: fdeadbcc-55a8-49b4-8908-f06a7fe61a1e
+		summarizeBy: none
+		sourceColumn: Hiring_Trend_2026
+
+		annotation SummarizationSetBy = Automatic
+
+	partition AI_Impact_on_Jobs_2030 = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\binh.bn\OneDrive - Procter and Gamble\binh.bn\Priority Tracker\Report\Priority Tracker Project\AI_Impact_on_Jobs_2030.csv"),[Delimiter=",", Columns=20, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Years_Experience", type number}, {"AI_Replacement_Risk", type number}, {"Future_Demand_Score", type number}, {"Average_Salary_USD", type number}, {"Job_Growth_2030", type number}, {"Work_Hours_Per_Week", type number}, {"Performance_Score", type number}, {"Job_Satisfaction", type number}, {"Hiring_Trend_2026", type text}, {"Upskilling_Needed", type text}, {"AI_Tool_Usage", type text}, {"Company_Size", type text}, {"Automation_Level", type text}, {"Required_Skills", type text}, {"Remote_Work_Possibility", type text}, {"Education_Level", type text}, {"Country", type text}, {"Industry", type text}, {"Job_Title", type text}, {"Employee_ID", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

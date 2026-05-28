@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "AI Impact On Jobs 2030"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "01fae54b-f522-400e-8205-7e38485998a0"
+  }
+}
