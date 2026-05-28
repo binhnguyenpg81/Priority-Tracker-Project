@@ -1,0 +1,90 @@
+table 'DO Scenario Metric Selection'
+	lineageTag: 58be0d54-5860-4a0d-90b5-58b5349f1dc1
+
+	column 'DO Scenario Metric Selection'
+		lineageTag: de3749bd-eca4-4d8f-8edb-360ffbbf1d5a
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'DO Scenario Metric Selection Order'
+
+		relatedColumnDetails
+			groupByColumn: 'DO Scenario Metric Selection Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DO Scenario Metric Selection Fields'
+		isHidden
+		lineageTag: fc538b93-51f8-4081-abc7-6e08c89c4c9c
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'DO Scenario Metric Selection Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DO Scenario Metric Selection Order'
+		isHidden
+		formatString: 0
+		lineageTag: 3ab0f7fb-b4f7-485f-913d-3656d56eb85f
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'MetricName Key'
+		lineageTag: 988ac919-3188-4a57-86ce-74ac0ad8927d
+		summarizeBy: none
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'DO Scenario Metric Selection' = calculated
+		mode: import
+		source =
+				{
+				    ("WS Sellout AC",             NAMEOF('00 Measure'[Sellout # Value RTDC WS]),                                0,  "RTDC"),
+				    ("WS % Hitting Target AC",    NAMEOF('00 Measure'[Sellout # Value RTDC Target Achievement WS]),             1,      "RTDC"),
+				    ("WS % Hitting Target JAS",   NAMEOF('00 Measure'[Sellout # Value RTDC WS JAS Target Achievement]),                                                                                              2,      "RTDC"),
+				    ("WS % Hitting Target OND",   NAMEOF('00 Measure'[Sellout # Value RTDC WS OND Target Achievement]),                                                                                              3,      "RTDC"),
+				    ("WS % Hitting Target JFM",   NAMEOF('00 Measure'[Sellout # Value RTDC WS JFM Target Achievement]),                                                                                              4,      "RTDC"),
+				    ("WS % Hitting Target AMJ",   NAMEOF('00 Measure'[Sellout # Value RTDC WS AMJ Target Achievement]),                                                                                              5,      "RTDC"),
+				    ("WS Coverage AC",            NAMEOF('00 Measure'[Sellout # Coverage]),                                     6,      "Coverage"),
+				    ("WS Coverage JAS",           NAMEOF('00 Measure'[Sellout # Coverage JAS]),                                 7,      "Coverage"),
+				    ("Coverage OND",              NAMEOF('00 Measure'[Sellout # Coverage OND]),                                 8,      "Coverage"),
+				    ("Coverage JFM",              NAMEOF('00 Measure'[Sellout # Coverage JFM]),                                 9,      "Coverage"),
+				    ("Coverage AMJ",              NAMEOF('00 Measure'[Sellout # Coverage AMJ]),                                 10,      "Coverage"),
+				    ("QDGP AC",                   NAMEOF('00 Measure'[QDGP # Value]),                                           11,      "QDGP"),
+				    ("QDGP% AC",                  NAMEOF('00 Measure'[QDGP # Value Target Index Achievement]),                                                                                              12,      "QDGP"),
+				    ("QDGP% JAS",                 NAMEOF('00 Measure'[QDGP # Value Target Index Achievement JAS]),              13,      "QDGP"),
+				    ("QDGP% OND",                 NAMEOF('00 Measure'[QDGP # Value Target Index Achievement OND]),              14,      "QDGP"),
+				    ("QDGP% JFM",                 NAMEOF('00 Measure'[QDGP # Value Target Index Achievement JFM]),              15,      "QDGP"),
+				    ("QDGP% AMJ",                 NAMEOF('00 Measure'[QDGP # Value Target Index Achievement AMJ]),              16,      "QDGP"),
+				    ("P3M DGP",                   NAMEOF('00 Measure'[DGP # Value]),                                            17,      "DGP"),
+				    ("P3M DGP JAS",               NAMEOF('00 Measure'[DGP # Value JAS]),                                        18,      "DGP"),
+				    ("P3M DGP OND",               NAMEOF('00 Measure'[DGP # Value OND]),                                        19,      "DGP"),
+				    ("P3M DGP JFM",               NAMEOF('00 Measure'[DGP # Value JFM]),                                        20,      "DGP"),
+				    ("P3M DGP AMJ",               NAMEOF('00 Measure'[DGP # Value AMJ]),                                        21,      "DGP"),
+				    ("P3M DGP IYA",               NAMEOF('00 Measure'[DGP # Value IYA]),                                        22,      "DGP"),
+				    ("P3M DGP IYA JAS",           NAMEOF('00 Measure'[DGP # Value IYA JAS]),                                    23,      "DGP"),
+				    ("P3M DGP IYA OND",           NAMEOF('00 Measure'[DGP # Value IYA OND]),                                    24,      "DGP"),
+				    ("P3M DGP IYA JFM",           NAMEOF('00 Measure'[DGP # Value IYA JFM]),                                    25,      "DGP"),
+				    ("P3M DGP IYA AMJ",           NAMEOF('00 Measure'[DGP # Value IYA AMJ]),                                    26,      "DGP"),
+				    ("Golden store %",            NAMEOF('00 Measure'[LP # Golden vs.Enrolled]),                                27,      "Golden store"),
+				    ("Golden store % JAS",        NAMEOF('00 Measure'[LP # Golden vs.Enrolled JAS]),                            28,      "Golden store"),
+				    ("Golden store % OND",        NAMEOF('00 Measure'[LP # Golden vs.Enrolled OND]),                            29,      "Golden store"),
+				    ("Golden store % JFM",        NAMEOF('00 Measure'[LP # Golden vs.Enrolled JFM]),                            30,      "Golden store"),
+				    ("Golden store % AMJ",        NAMEOF('00 Measure'[LP # Golden vs.Enrolled AMJ]),                            31,      "Golden store"),
+				    ("OT Bill/Day",               NAMEOF('00 Measure'[Bill # Avg. No. Bill/Day]),                               32,      "OT Bill/Day"),
+				    ("OT Bill/Day JAS",               NAMEOF('00 Measure'[Bill # ANBD JAS]),                                    33,      "OT Bill/Day"),
+				    ("OT Bill/Day OND",               NAMEOF('00 Measure'[Bill # ANBD OND]),                                    34,      "OT Bill/Day"),
+				    ("OT Bill/Day JFM",               NAMEOF('00 Measure'[Bill # ANBD JFM]),                                    35,      "OT Bill/Day"),
+				    ("OT Bill/Day AMJ",               NAMEOF('00 Measure'[Bill # ANBD AMJ]),                                    36,      "OT Bill/Day")
+				}
+
+	annotation PBI_Id = e29b8022f80748dcadd493d284c9c5af
+

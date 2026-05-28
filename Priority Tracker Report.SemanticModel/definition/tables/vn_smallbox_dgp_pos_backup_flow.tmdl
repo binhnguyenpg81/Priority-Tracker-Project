@@ -1,0 +1,72 @@
+table vn_smallbox_dgp_pos_backup_flow
+	lineageTag: 9df1e613-4018-426e-8fb4-bd2eb892fcac
+
+	column 'Interim00 DGP by Store[DGP Sellout + Inventory (POS) P3M]'
+		dataType: int64
+		formatString: 0
+		lineageTag: a33f36e5-e46e-4ed1-b4b8-45b4b00dbc2c
+		summarizeBy: sum
+		sourceColumn: Interim00 DGP by Store[DGP Sellout + Inventory (POS) P3M]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Interim00 DGP by Store[YearMonth]'
+		dataType: string
+		lineageTag: fa992674-ca84-40c5-a48a-ac238669f5f8
+		summarizeBy: none
+		sourceColumn: Interim00 DGP by Store[YearMonth]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Interim00 DGP by Store[EAN]'
+		dataType: string
+		lineageTag: bd3c2a39-9ea8-465a-9a20-c8107165e28c
+		summarizeBy: none
+		sourceColumn: Interim00 DGP by Store[EAN]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Interim00 DGP by Store[Sellout Code]'
+		dataType: string
+		lineageTag: f2ba6cdc-fc90-4179-9891-08fec0015cf8
+		summarizeBy: none
+		sourceColumn: Interim00 DGP by Store[Sellout Code]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Interim00 DGP by Store[Customer]'
+		dataType: string
+		lineageTag: 06232300-8ed0-411e-836a-03dfaa07e6be
+		summarizeBy: none
+		sourceColumn: Interim00 DGP by Store[Customer]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Interim00 DGP by Store[DGP Sellout + Inventory (POS)]'
+		dataType: int64
+		formatString: 0
+		lineageTag: a84d1bab-bb30-4d92-9d57-a50f639f724d
+		summarizeBy: sum
+		sourceColumn: Interim00 DGP by Store[DGP Sellout + Inventory (POS)]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vn_smallbox_dgp_pos_backup_flow = m
+		mode: import
+		queryGroup: Fact
+		source =
+				let
+				    Source = PowerPlatform.Dataflows(null),
+				    Workspaces = Source{[Id="Workspaces"]}[Data],
+				    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+				    #"55a45012-0ce5-4f6b-9fff-5c0a82ede0e4" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="55a45012-0ce5-4f6b-9fff-5c0a82ede0e4"]}[Data],
+				    vn_smallbox_dgp_pos_backup_flow_ = #"55a45012-0ce5-4f6b-9fff-5c0a82ede0e4"{[entity="vn_smallbox_dgp_pos_backup_flow",version=""]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(vn_smallbox_dgp_pos_backup_flow_,{{"Interim00 DGP by Store[EAN]", type text}}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type",{"Interim00 DGP by Store[DGP Sellout + Inventory (POS) P3M]", "Interim00 DGP by Store[YearMonth]", "Interim00 DGP by Store[EAN]", "Interim00 DGP by Store[Sellout Code]", "Interim00 DGP by Store[Customer]", "Interim00 DGP by Store[DGP Sellout + Inventory (POS)]"})
+				in
+				    #"Removed Other Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

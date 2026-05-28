@@ -1,0 +1,61 @@
+table 'Scenario Selection Comparison'
+	lineageTag: cdee5dc4-7333-4028-8f23-22b1d6da7b92
+
+	column Com_ID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 81ce3104-2a85-45a0-87f8-7eb46bec4e56
+		summarizeBy: count
+		sourceColumn: Com_ID
+
+		changedProperty = DataType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Com_Name
+		dataType: string
+		lineageTag: 6637d973-0937-4241-87c8-29927be297d7
+		summarizeBy: none
+		sourceColumn: Com_Name
+		sortByColumn: Com_ID
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column Com_DisplayName
+		dataType: string
+		lineageTag: 9ac94aac-9fa4-4b29-b91d-4bc06ee31d95
+		summarizeBy: none
+		sourceColumn: Com_DisplayName
+		sortByColumn: Com_ID
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Com_Display Name Alt.'
+		dataType: string
+		lineageTag: f85be21b-adfd-4d81-8f48-a250da6612fc
+		summarizeBy: none
+		sourceColumn: Com_Display Name Alt.
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Scenario Selection Comparison' = m
+		mode: import
+		queryGroup: Parameter
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WMlTSUQqIhBNFqWWZ+aXFCpWpiUVKsTrRSkZA0RB3OJFYlJ5aohQbCwA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ID = _t, Name = _t, #"Display Name" = _t, #"Display Name Alt." = _t]),
+				    #"Renamed Columns" = Table.RenameColumns(Source,{{"ID", "Com_ID"}, {"Name", "Com_Name"}, {"Display Name", "Com_DisplayName"}, {"Display Name Alt.", "Com_Display Name Alt."}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

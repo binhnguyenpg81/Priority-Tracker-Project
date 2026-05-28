@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Priority Tracker Report"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "53150107-06fd-4406-a0e0-a4ec8b60bd18"
+  }
+}

@@ -1,0 +1,100 @@
+table vn_workday
+	lineageTag: 986c9823-7a0a-493a-abc7-5711091e1ef4
+
+	column country
+		dataType: string
+		lineageTag: 06be2f94-639b-4193-b95d-c471ad0fc2b4
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	column cust_key
+		dataType: string
+		lineageTag: 5d61c70b-1ed5-4582-9d3c-fcbeba5dda92
+		summarizeBy: none
+		sourceColumn: cust_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column workday
+		dataType: int64
+		formatString: 0
+		lineageTag: 0f4c3502-3bfb-42eb-b410-57f1b0364730
+		summarizeBy: sum
+		sourceColumn: workday
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'date - Copy'
+		dataType: string
+		lineageTag: 8528d9af-9c4a-4796-8aab-2d9d76cf7322
+		summarizeBy: none
+		sourceColumn: date - Copy
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'count of working days'
+		dataType: int64
+		formatString: 0
+		lineageTag: c8a6bd59-22c0-41ea-9858-25d8e0497f6d
+		summarizeBy: sum
+		sourceColumn: count of working days
+
+		annotation SummarizationSetBy = Automatic
+
+	column Denominator
+		dataType: int64
+		formatString: 0
+		lineageTag: 3adcca18-613d-4f18-ae1d-286e2503f48d
+		summarizeBy: sum
+		sourceColumn: Denominator
+
+		annotation SummarizationSetBy = Automatic
+
+	column date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 19bd3963-9f8b-4622-b8fb-d4ccf9734228
+		summarizeBy: none
+		sourceColumn: date
+
+		variation Variation
+			isDefault
+			relationship: 25a2f28e-e805-4b29-abdf-12dc4ada723e
+			defaultHierarchy: LocalDateTable_8483fdc5-7347-4fca-a685-1caea29a1b0e.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition vn_workday = m
+		mode: import
+		queryGroup: Dimension
+		source =
+				let
+				    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+				    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+				    msv_workbench_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench",Kind="Schema"]}[Data],
+				    sl_msv_workingdaycalendar_vw_Table = msv_workbench_Schema{[Name="sl_msv_workingdaycalendar_vw",Kind="Table"]}[Data],
+				    #"Filtered Rows" = Table.SelectRows(sl_msv_workingdaycalendar_vw_Table, each ([country] = "Vietnam")),
+				    #"Converted Month Column" = Table.TransformColumns(#"Filtered Rows", {{"date", each Date.FromText(_, "en-GB"), type date}}),
+				    #"Replaced Value" = Table.ReplaceValue(#"Converted Month Column","TRUE","1",Replacer.ReplaceText,{"workday"}),
+				    #"Replaced Value1" = Table.ReplaceValue(#"Replaced Value","FALSE","0",Replacer.ReplaceText,{"workday"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Replaced Value1",{{"workday", Int64.Type}}),
+				    #"Duplicated Column" = Table.DuplicateColumn(#"Changed Type", "date", "date - Copy"),
+				    #"Extracted Day Name" = Table.TransformColumns(#"Duplicated Column", {{"date - Copy", each Date.DayOfWeekName(_), type text}}),
+				    #"Added Conditional Column" = Table.AddColumn(#"Extracted Day Name", "Custom", each if [#"date - Copy"] = "Saturday" then 1 else [workday]),
+				    #"Renamed Columns" = Table.RenameColumns(#"Added Conditional Column",{{"Custom", "count of working days"}}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Renamed Columns",{{"count of working days", Int64.Type}}),
+				    #"Added Conditional Column1" = Table.AddColumn(#"Changed Type1", "Custom", each if [#"date - Copy"] = "Sunday" then 1 else [count of working days]),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Added Conditional Column1",{{"Custom", "Denominator"}}),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Renamed Columns1",{{"Denominator", Int64.Type}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type2",{"ama_Active_Flag", "ama_insert_date", "ama_last_processed_date", "rundate"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

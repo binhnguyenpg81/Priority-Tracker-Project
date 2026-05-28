@@ -1,0 +1,83 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.0.0/schema.json",
+  "name": "e6848793cecc12bc093f",
+  "displayName": "Duplicate of DO Analysis",
+  "displayOption": "FitToWidth",
+  "height": 1850,
+  "width": 1980,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "image": {
+            "image": {
+              "name": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'Frame_DO_1850.png'"
+                  }
+                }
+              },
+              "url": {
+                "expr": {
+                  "ResourcePackageItem": {
+                    "PackageName": "RegisteredResources",
+                    "PackageType": 1,
+                    "ItemName": "Frame_DO_185027192709955789207.png"
+                  }
+                }
+              },
+              "scaling": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'Normal'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visibility": "HiddenInViewMode",
+  "visualInteractions": [
+    {
+      "source": "2ac8c786ba3ec843a237",
+      "target": "2e8e8279f3b339622e42",
+      "type": "NoFilter"
+    },
+    {
+      "source": "2e8e8279f3b339622e42",
+      "target": "2ac8c786ba3ec843a237",
+      "type": "NoFilter"
+    },
+    {
+      "source": "2ac8c786ba3ec843a237",
+      "target": "5f02628714cea525aecc",
+      "type": "NoFilter"
+    },
+    {
+      "source": "2e8e8279f3b339622e42",
+      "target": "f9050cc649356e0e8f53",
+      "type": "NoFilter"
+    },
+    {
+      "source": "2e8e8279f3b339622e42",
+      "target": "b062c00b0dceadb2b88f",
+      "type": "NoFilter"
+    },
+    {
+      "source": "2ac8c786ba3ec843a237",
+      "target": "3360f66a624e0512469e",
+      "type": "NoFilter"
+    }
+  ]
+}

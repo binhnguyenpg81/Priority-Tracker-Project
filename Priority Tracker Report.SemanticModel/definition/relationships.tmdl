@@ -1,0 +1,442 @@
+relationship b4b1c3a0-97be-0087-ea6b-03089c1eeaa1
+	fromColumn: dim_sub_channel.channel
+	toColumn: dim_channel.channel
+
+relationship aff139bd-d480-09dd-7428-693e5f05a41d
+	fromColumn: vn_indirect_shipment_fct.day_date
+	toColumn: vn_calendar.date
+
+relationship 2aee1b8f-26b5-331a-8aaa-63a1379ffb68
+	fromColumn: vn_direct_shipment_fct.day_date
+	toColumn: vn_calendar.date
+
+relationship bffd3f2c-f54a-4239-9b29-e192969d7a91
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_product.update_date
+	toColumn: LocalDateTable_40588dba-1d55-4fd1-9335-e8df5100cf93.Date
+
+relationship cb99d83e-8034-4f99-b3c9-3e2c42c2a537
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_product.insert_date
+	toColumn: LocalDateTable_cf7384c1-17ac-49c7-af09-96b84f4b8ad1.Date
+
+relationship df8bde90-6a9c-4235-9522-1512fda9a3a3
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_product.ama_last_processed_date
+	toColumn: LocalDateTable_b4447a94-2bad-439a-ab0b-ad35cf793595.Date
+
+relationship 8211b89e-b0fb-b009-534f-b1c453282670
+	fromColumn: vn_indirect_shipment_fct.prod_key
+	toColumn: dim_product.prod_key
+
+relationship 90248f91-0743-3950-179c-e924e5d8301b
+	fromColumn: vn_direct_shipment_fct.prod_key
+	toColumn: dim_product.prod_key
+
+relationship b5deff61-f35e-a67a-ab61-c10b0fd362ed
+	fromColumn: vn_pos_monthly.date
+	toColumn: vn_calendar.date
+
+relationship ff3093b6-04a2-52ad-e9ec-ad05aaebabf1
+	fromColumn: vn_pos_coop.date
+	toColumn: vn_calendar.date
+
+relationship 35163b10-f588-7756-e1db-c81f8dcddb6a
+	fromColumn: vn_pos_crv.date
+	toColumn: vn_calendar.date
+
+relationship e333e08f-cf71-cc4e-9715-3b981b23925f
+	fromColumn: dim_direct_cust.sub_channel
+	toColumn: dim_sub_channel.sub_channel
+
+relationship cf0a09e3-e6b2-845b-c755-cea1247c04d0
+	fromColumn: dim_indirect_store.sub_channel
+	toColumn: dim_sub_channel.sub_channel
+
+relationship 82fb6384-1762-5c56-8737-a4cfd2ea5b6c
+	fromColumn: vn_direct_shipment_fct.cust_key
+	toColumn: dim_direct_cust.cust_key
+
+relationship 02754470-b985-1a09-20f0-25b75ad8cce6
+	fromColumn: vn_pos_monthly.gtin_item
+	toColumn: dim_product.prod_key
+
+relationship 48a88552-b7eb-a491-c59b-54f2865d1576
+	fromColumn: vn_pos_crv.gtin_code
+	toColumn: dim_product.prod_key
+
+relationship e7a15ad6-e7c5-bdbe-401b-8332e440af91
+	fromColumn: vn_pos_coop.gtin_code
+	toColumn: dim_product.prod_key
+
+relationship 59d3b3a4-6657-43e5-e9b8-e41bf6de2980
+	fromColumn: vn_indirect_psku.day_date
+	toColumn: vn_calendar.date
+
+relationship 29c6ef89-3f36-de35-9f0f-c6a74920e647
+	fromColumn: vn_indirect_psku.prod_key
+	toColumn: dim_product.prod_key
+
+relationship f7e3dbc6-8652-4007-b274-1bd891e89231
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_pos_product.insert_date
+	toColumn: LocalDateTable_091d9ac7-a2a7-439e-8d46-a55592906cf3.Date
+
+relationship a2ea4478-538a-0809-a41d-ac791f0fc6bc
+	fromColumn: fct_psku_pos.date
+	toColumn: vn_calendar.date
+
+relationship b9eb1f14-6756-33a4-7c9d-4aa30f50d61a
+	fromColumn: fct_psku_pos.gtin_item
+	toColumn: dim_product.prod_key
+
+relationship 4fc86fb6-8679-4119-bc9a-9a219efb2d2a
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fct_psku_inventory.date
+	toColumn: LocalDateTable_5609f918-5ff8-4f34-b6c7-4c6a3e5aae24.Date
+
+relationship caea35a4-d562-4d9d-2d4c-1c0c1e4a62bb
+	fromColumn: fct_dgp_smartsell.date
+	toColumn: vn_calendar.date
+
+relationship 6cf5f3e6-2197-7f6b-2490-dad61ec58a8c
+	fromColumn: fct_dgp_smartsell.gtin_item
+	toColumn: dim_product.prod_key
+
+relationship 4d8096a5-8f7f-0504-bcca-f588804c11ec
+	fromColumn: vn_indirect_shipment_fct.key_qdgp
+	toColumn: fct_qdgp.key_qdgp
+
+relationship 83fdb51a-f175-4d93-82dc-1d2e4664159f
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vn_indirect_coverage.update_date
+	toColumn: LocalDateTable_87ec4d1b-66ce-47e2-93b5-e8d7eb9d1e55.Date
+
+relationship 7244ddc4-df64-491c-8d76-6c9d6513b33f
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vn_indirect_coverage.ama_last_processed_date
+	toColumn: LocalDateTable_d901be79-89eb-4ff7-a72c-3f3ae1ec7269.Date
+
+relationship 8648edca-e4bd-0059-d8a8-02abcc6843c0
+	fromColumn: vn_indirect_coverage.day_date
+	toColumn: vn_calendar.date
+
+relationship 7d736bdb-e5fa-da14-94a8-af7170218476
+	fromColumn: fct_igp.date
+	toColumn: vn_calendar.date
+
+relationship 5ad47c46-d583-4987-9322-072810977cb9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vn_indirect_coverage.insert_date
+	toColumn: LocalDateTable_e251f496-08b5-415f-97cc-958dbda9631d.Date
+
+relationship 29b4fe7d-2b7f-0182-2cdb-e7dd4646162d
+	fromColumn: vn_indirect_shipment_fct.store_key
+	toColumn: dim_indirect_store.pr_key
+
+relationship 9aedbfd0-77be-6347-b315-bb06031de838
+	fromColumn: vn_indirect_psku.store_key
+	toColumn: dim_indirect_store.pr_key
+
+relationship d5fbf221-7aa3-69a9-9160-29bd03128439
+	fromColumn: sos_sod_fct_hsm.visit_date
+	toColumn: vn_calendar.date
+
+relationship 2f54c0de-2b9b-2e5a-bf36-569fd481b855
+	fromColumn: vn_ir_sos_sod_actual.date
+	toColumn: vn_calendar.date
+
+relationship 6e902b2b-e825-c72d-7ff9-9d8efba70561
+	fromColumn: vn_ir_sos_sod_target.date
+	toColumn: vn_calendar.date
+
+relationship d82f282f-47cd-45ed-a613-15dacbed4d8f
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vn_sfdc_sf_vgp_promo_fct.visitdate
+	toColumn: LocalDateTable_d76aa660-e7ea-4ff9-b12b-8a197c2caf0e.Date
+
+relationship d29dd479-017a-3917-46a2-51c81365f646
+	fromColumn: vn_vgp_actual.date
+	toColumn: vn_calendar.date
+
+relationship feffc728-520b-eb9a-c54e-f64837b36e88
+	fromColumn: vn_vgp_actual.store_id
+	toColumn: dim_indirect_store.pr_key
+
+relationship 595bba4b-f110-4b87-8960-2d65414d686a
+	joinOnDateBehavior: datePartOnly
+	fromColumn: sos_sod_fct_sb.visit_date
+	toColumn: LocalDateTable_1234a220-7c01-47c0-9513-db0708df4a89.Date
+
+relationship dc7a0632-6e07-575c-7de5-bd632abfda0b
+	fromColumn: 'share_value_fct_Lan Chi'.date
+	toColumn: vn_calendar.date
+
+relationship cad45f85-a79d-a7c1-dcc1-2d104ad442b7
+	fromColumn: share_value_fct_total.date
+	toColumn: vn_calendar.date
+
+relationship 63ad70e0-3053-fe89-53b6-f2347a3b378d
+	fromColumn: share_value_fct_total.customer
+	toColumn: dim_customer_share_value.customer
+
+relationship 3fc58c9f-8f9f-c024-cd48-03129d97a07e
+	fromColumn: 'share_value_fct_Lan Chi'.customer
+	toColumn: dim_customer_share_value.customer
+
+relationship 275426d7-6212-aa66-9819-463fdfeab7ff
+	fromColumn: 'share_value_fct_Lan Chi'.'Category (modified)'
+	toColumn: dim_category.category
+
+relationship e4b1046a-9a3d-1c68-d5af-9f03a7c1fb01
+	fromColumn: share_value_fct_total.category
+	toColumn: dim_category.category
+
+relationship 3988113f-1e4f-7c25-b275-083afdecacfe
+	fromColumn: dim_indirect_store.sub_channel
+	toColumn: dim_customer_share_value.customer
+
+relationship 38020671-4ec0-12db-4b94-81b84850a396
+	fromColumn: dim_product.category
+	toColumn: dim_category.category
+
+relationship 6945d0af-47a1-28fb-b09b-93f91d2ec0b5
+	fromColumn: dim_pos_store.sub_channel
+	toColumn: dim_sub_channel.sub_channel
+
+relationship 86e49448-9849-5f03-c974-06e8380e479e
+	fromColumn: vn_pos_monthly.store_code
+	toColumn: dim_pos_store.pr_key
+
+relationship ed159f56-cf8c-9a7a-68e7-7a2097c4dfdf
+	fromColumn: vn_pos_crv.store_code
+	toColumn: dim_pos_store.pr_key
+
+relationship 9586047d-0d41-edda-e3fd-f18b706bb565
+	fromColumn: vn_pos_coop.store_code
+	toColumn: dim_pos_store.pr_key
+
+relationship 97e730f4-d66b-2e2e-6f39-d8a4219c2867
+	fromColumn: dim_pos_store.sub_channel
+	toColumn: dim_customer_share_value.customer
+
+relationship 1dc047d4-eaa3-6229-0fa7-c3de55f3c4d1
+	fromColumn: dim_product.brand
+	toColumn: dim_brand.brand
+
+relationship aaf4aaca-225b-38c9-ae80-95733e011c5f
+	isActive: false
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: vn_calendar_filter.date
+	toColumn: vn_calendar.date
+
+relationship 5c89a51c-c13e-a840-84b1-54e5b506a871
+	fromColumn: fct_psku_pos.store_code
+	toColumn: dim_pos_store.pr_key
+
+relationship 7d3c4833-ed2d-3045-d423-413aaa3a00e4
+	fromColumn: fct_dgp_smartsell.pr_key
+	toColumn: dim_pos_store.pr_key
+
+relationship aaf063fe-8504-14c5-4c65-a7661f6f69c0
+	fromColumn: vn_direct_shipment_target_fct.date
+	toColumn: vn_calendar.date
+
+relationship 9e6a70ac-854d-fc5f-1444-8d6d45d42c24
+	fromColumn: vn_direct_shipment_target_fct.cust_key
+	toColumn: dim_direct_cust.cust_key
+
+relationship 69222864-0ada-9cbd-0852-b758ece7380b
+	fromColumn: vn_direct_shipment_target_fct.prod_key
+	toColumn: dim_product.prod_key
+
+relationship 47129c1f-4753-c690-5118-3ce89e1901b3
+	fromColumn: 'Scenario Selection Mixed (DataType-Comparison)'.Com_Name
+	toColumn: 'Scenario Selection Comparison'.Com_Name
+
+relationship 4d987af7-654f-466b-772f-45862f6d2225
+	fromColumn: 'Scenario Selection Mixed (DataType-Comparison)'.Typ_Name
+	toColumn: 'Scenario Selection DataType'.Typ_Name
+
+relationship f7346ef1-639a-e805-12e5-c2e571fb5003
+	fromColumn: 'Scenario Selection Mixed (DataType-Period-Comparison)'.Com_Name
+	toColumn: 'Scenario Selection Comparison'.Com_Name
+
+relationship 75eae025-acac-a7e9-a1c8-287c07fffaa7
+	fromColumn: 'Scenario Selection Mixed (DataType-Period-Comparison)'.Typ_Name
+	toColumn: 'Scenario Selection DataType'.Typ_Name
+
+relationship fb662463-98cf-37b7-5e4f-b43838b87aff
+	fromColumn: 'Scenario Selection Mixed (DataType-Period-Comparison)'.Per_Name
+	toColumn: 'Scenario Selection TimePeriod'.Per_Name
+
+relationship 4aca4e04-98d6-4d88-a6d4-bf811f80bc28
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vn_indirect_target_distributor_seller.date
+	toColumn: LocalDateTable_315cf2b0-ed86-41e7-91bc-2445d2cfedd8.Date
+
+relationship cac53c01-bf28-df77-2e27-c0fd9e4fc87d
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Scenario Selection DataType'.Typ_Name
+	toColumn: 'FP Scenario Values Actual Column Chart'.'MetricName Key'
+
+relationship 21adede8-e0f0-2275-abe8-659d2af9b09b
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Scenario Selection DataType'.Typ_Name
+	toColumn: 'FP Scenario Values Actual Table Chart'.'MetricName Key'
+
+relationship fb0ba34b-f5c2-8f26-2eb1-51bd83b8d7d1
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Scenario Selection Mixed (DataType-Comparison)'.'Mixed Key'
+	toColumn: 'FP Scenario Values Comparison Table'.'MetricName Key'
+
+relationship 3c22dcaf-fcb5-c38e-1af8-7a4dc3e9dacf
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Scenario Selection Comparison'.Com_Name
+	toColumn: 'FP Scenario Values Comparison Only'.'MetricName Key'
+
+relationship 6d597ffc-250e-40c1-9e32-d24e052fe1db
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vn_calendar.date
+	toColumn: LocalDateTable_6bf67dc3-4308-4f5f-a80c-06c216cb9868.Date
+
+relationship 712be47d-df14-3a58-dd1f-452368b72054
+	fromColumn: vn_ir_sos_sod_target.store_id
+	toColumn: dim_indirect_store.pr_key
+
+relationship e272caf0-91f5-ccd4-6adb-9eb27def4b2f
+	fromColumn: vn_ir_sos_sod_target.category_total
+	toColumn: dim_category.category
+
+relationship f204acd0-adf3-cb09-126b-a85308c07a00
+	fromColumn: dim_category_brand.base
+	toColumn: dim_category.category
+
+relationship 49111204-2d90-a229-dc6e-55e15db8f022
+	fromColumn: dim_category_brand.brand
+	toColumn: dim_brand.brand
+
+relationship bf064473-dbc4-bb11-2ff6-054e4cc26b5a
+	fromColumn: vn_ir_sos_sod_actual.category_brand
+	toColumn: dim_category_brand.category_brand
+
+relationship beb9bc27-22a6-fa44-ee0d-1dd38d860baf
+	fromColumn: vn_indirect_target_brand_distributor.sub_channel
+	toColumn: dim_sub_channel.sub_channel
+
+relationship bbdbbc13-932f-d4d9-8017-d97f856b9702
+	fromColumn: vn_indirect_target_brand_distributor.date
+	toColumn: vn_calendar.date
+
+relationship 7f6e01fd-de1d-c66f-707d-fdba87e8091b
+	fromColumn: vn_business_target_distributor_storeswise.pr_key
+	toColumn: dim_indirect_store.pr_key
+
+relationship 18eecad7-0227-2107-6a34-d4628ab5f698
+	fromColumn: vn_business_target_distributor_storeswise.Date
+	toColumn: vn_calendar.date
+
+relationship c8b28943-91fc-b6ea-6cf1-2414f05dc7c2
+	fromColumn: vn_busines_target_LP.date
+	toColumn: vn_calendar.date
+
+relationship 25a2f28e-e805-4b29-abdf-12dc4ada723e
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vn_workday.date
+	toColumn: LocalDateTable_8483fdc5-7347-4fca-a685-1caea29a1b0e.Date
+
+relationship e2462566-2d1d-d8a1-b6d5-dc8cd42aa875
+	fromColumn: vn_hpt_displaycheck_visitmonth.date
+	toColumn: vn_calendar.date
+
+relationship 4a8ab4b1-14d6-69cb-7668-caf64306c445
+	fromColumn: vn_hpt_displaycheck_visitmonth.store_key
+	toColumn: dim_indirect_store.pr_key
+
+relationship f342a6fa-8539-0a29-5009-8b8c324cbbb1
+	fromColumn: 'Scenario Selection Mixed (DataType-Period)'.Typ_Name
+	toColumn: 'Scenario Selection DataType'.Typ_Name
+
+relationship 22d9e9ad-dab8-67e0-930f-0ac108595cef
+	fromColumn: 'Scenario Selection Mixed (DataType-Period)'.Per_Name
+	toColumn: 'Scenario Selection TimePeriod'.Per_Name
+
+relationship 590f7865-d3b7-d24b-b2b2-bd4dfff4ef44
+	fromColumn: 'Do Scenario Metric Selection (DataType-Period)'.Per_Name
+	toColumn: 'Scenario Selection TimePeriod'.Per_Name
+
+relationship f56fedb9-72db-d263-ec5e-d098a53d7bc7
+	fromColumn: 'Do Scenario Metric Selection (DataType-Period)'.Typ_Name
+	toColumn: 'Scenario Selection DataType'.Typ_Name
+
+relationship db3a1a12-32c7-ea93-407f-571faeb5c789
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Do Scenario Metric Selection (DataType-Period)'.'Mixed Key'
+	toColumn: 'DO Scenario Selection Mixed'.'MetricName Key'
+
+relationship e2fc6939-aaa6-c4e2-a770-f46d134839e0
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Scenario Selection Mixed (DataType-Comparison)'.'Mixed Key'
+	toColumn: 'FP Scenario Values Comparison Column Chart'.'MetricName Key'
+
+relationship 70651fbd-9ca1-394c-e645-358472ac3265
+	crossFilteringBehavior: bothDirections
+	fromColumn: 'FP Scenario Values Variances (Data Type - Period)'.'MetricName Key'
+	toColumn: 'Scenario Selection Mixed (DataType-Period)'.'Mixed Key'
+
+relationship bce102db-0377-29cf-4389-ff2700227bf1
+	fromColumn: 'FP Scenario Values Variances (Datatype-Comparison)'.'MetricName Key'
+	toColumn: 'Scenario Selection Mixed (DataType-Comparison)'.'Mixed Key'
+
+relationship 08fa2416-5f27-8b2f-c7c5-b3c6c6cf1e0a
+	fromColumn: 'FP Scenario Values Variances (Datatype-Period-Comparison)'.'MetricName Key'
+	toColumn: 'Scenario Selection Mixed (DataType-Period-Comparison)'.key
+
+relationship ac336f44-54a9-ada0-b3a5-48405bfb0363
+	fromColumn: vn_busines_target_LP.pr_key
+	toColumn: dim_indirect_store.pr_key
+
+relationship ea17492f-8922-83fe-bbbd-7e53356a0f75
+	fromColumn: vn_indirect_shipment_fct.store_key_hist
+	toColumn: dim_indirect_store_hist.store_key
+
+relationship 45180eeb-75f6-fccd-d8b1-c2d84ff9c8e2
+	fromColumn: vn_hpt_displaycheck_visitmonth.store_key
+	toColumn: dim_indirect_store_hist.store_key
+
+relationship ed0bb095-15eb-938d-c235-7d52acb75c62
+	fromColumn: 'DO Scenario Metric Selection'.'MetricName Key'
+	toColumn: 'Scenario Selection DataType'.Typ_Name
+
+relationship b873e448-e984-8c4a-8e60-a9893ac09d18
+	fromColumn: 'DO Scenario Metric Selection L12M Column'.'MetricName Key'
+	toColumn: 'Scenario Selection DataType'.Typ_Name
+
+relationship e2431bf3-2b5c-b2a3-cd8b-0fd97eb7e15a
+	fromColumn: 'DO Scenario Metric Selection L12M Line'.'MetricName Key'
+	toColumn: 'Scenario Selection DataType'.Typ_Name
+
+relationship 814ca6a2-2d77-489b-8258-ebbcbb7c2cdd
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_indirect_store_hist.begin_date
+	toColumn: LocalDateTable_48304a35-fa8d-4419-b00c-edf895f0d23f.Date
+
+relationship 0fb7f26a-918c-87b9-ce43-53e6e1f29ab1
+	fromColumn: vn_indirect_coverage.store_key
+	toColumn: dim_indirect_store.pr_key
+
+relationship dbb7e388-9b07-725d-3fde-57e661bd2cf3
+	fromColumn: vn_ir_sos_sod_actual.store_id
+	toColumn: dim_indirect_store.pr_key
+
+relationship 08c8f947-16db-c87e-0f1e-0dd3d6fc7b10
+	fromColumn: fct_igp.pr_key
+	toColumn: dim_indirect_store.pr_key
+

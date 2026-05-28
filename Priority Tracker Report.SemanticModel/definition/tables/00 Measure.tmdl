@@ -1,0 +1,4422 @@
+table '00 Measure'
+	lineageTag: d7ec3265-d376-40a3-996a-4e51426a3f7a
+
+	measure 'Shipment # Value' = (SUM(vn_direct_shipment_fct[shipment_giv_value]) * 1.08) / 10^9
+		displayFolder: 01 Shipment
+		lineageTag: 08a5eef3-2411-4322-90da-fb2028ce861b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value FYTD PY' =
+			
+			CALCULATE(
+			    [Shipment # Value FYTD],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 01 Shipment
+		lineageTag: 5089cf54-472d-4e91-b2c5-7b293baa7adc
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value FYTD' = ```
+			
+			CALCULATE(
+			    [Shipment # Value],
+			    DATESYTD( vn_calendar[date] , "6-30") 
+			)
+			```
+		displayFolder: 01 Shipment
+		lineageTag: 50289132-6b32-40ae-934a-f11858408ddb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [Shipment # Value],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			RETURN
+			DIVIDE( _JAS_Value , _JAS_Month_Num * 3)
+			```
+		formatString: #,0
+		displayFolder: 01 Shipment
+		lineageTag: 821f2636-b856-4c36-ae78-c75e630a3440
+
+	measure 'Shipment # Value FYTD IYA' =
+			
+			DIVIDE([Shipment # Value FYTD],[Shipment # Value FYTD PY]) * 100
+		displayFolder: 01 Shipment
+		lineageTag: 0e19b341-d45c-4b15-90c8-35181f5f1ebc
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value vs. JAS' =
+			
+			DIVIDE(
+			    [Shipment # Value] - [Shipment # Value JAS],
+			    [Shipment # Value JAS]
+			)
+		formatString: #,0.00%;-#,0.00%;#,0.00%
+		displayFolder: 01 Shipment
+		lineageTag: 1f750e0d-5eac-4c7a-b388-74b9d5888be5
+
+	measure 'Sellout # Value FYTD' = ```
+			
+			CALCULATE(
+			    [Sellout # Value Total],
+			    DATESYTD( vn_calendar[date] , "6-30") 
+			)
+			```
+		displayFolder: 02 Sellout
+		lineageTag: dc622fc9-bd70-42b9-bd35-e48364978ad7
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value FYTD IYA' =
+			
+			CALCULATE(
+			    [Sellout # Value FYTD],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 02 Sellout
+		lineageTag: aff4cba2-bbd1-4ff0-a8a8-b932d0056ecb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value FYTD IYA %' =
+			
+			DIVIDE(
+			    [Sellout # Value FYTD] - [Sellout # Value FYTD IYA],
+			    [Sellout # Value FYTD IYA]
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: 3837cf97-c360-4914-9dab-2ace7c722914
+
+	measure 'Sellout # Value JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [Sellout # Value Total],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			RETURN
+			DIVIDE( _JAS_Value , _JAS_Month_Num * 3)
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 65377166-0d60-460f-b6d1-9d2288709499
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value vs. JAS' =
+			
+			DIVIDE(
+			    [Sellout # Value Total] - [Sellout # Value JAS],
+			    [Sellout # Value JAS]
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: f00d7368-3b60-434d-b542-aee8f29039c3
+
+	measure 'Sellout # Value Total' = [Sellout # Value POS] + [Sellout # Value RTDC]
+		displayFolder: 02 Sellout
+		lineageTag: 38601fbc-c376-4c41-96f5-58d17ac6fd3f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'QDGP # Value' =
+			
+			CALCULATE(
+			    COUNTROWS(
+			        SUMMARIZE(
+			            vn_indirect_shipment_fct,
+			            vn_indirect_shipment_fct[store_key],
+			            vn_indirect_shipment_fct[key_qdgp_group]
+			        )
+			    ),
+			    vn_indirect_shipment_fct[QDGP_Hit] = 1
+			)
+		formatString: #,0
+		displayFolder: 04 QDGP
+		lineageTag: 21cef506-223f-4c71-841c-44eee49a507a
+
+	measure 'Sellout # Value RTDC' = (SUM(vn_indirect_shipment_fct[indirect_giv_shipment]) * 1.08 ) /10^9
+		displayFolder: 02 Sellout
+		lineageTag: bcac2822-ebb0-4d82-9d52-a287c8fd59ff
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS' = ```
+			(SUM( vn_pos_monthly[sales_value] ) +
+			SUM( vn_pos_crv[sales_value] ) + 
+			SUM( vn_pos_coop[sales_value] )) / 10^9
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 3abf21b7-d98a-42e8-9b79-d5e5f64b4926
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'DGP # RTDC' =
+			
+			CALCULATE(
+			    SUM(vn_indirect_psku[DGP_P3M]),
+			    vn_indirect_psku[spku] = 1)
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: 1c78fc28-4e49-43d7-98d4-a4d8dcfbe4e0
+
+	measure 'DGP # POS' = ```
+			
+			VAR _table = 
+			SUMMARIZE( fct_psku_pos, fct_psku_pos[store_code], fct_psku_pos[date] )
+			RETURN
+			SUMX(
+			    _table,
+			    CALCULATE(
+			        DISTINCTCOUNT( fct_psku_pos[psku_code] ),
+			        fct_psku_pos[DGP_P3M] > 0)
+			)
+			```
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: 26b16165-5b04-41a3-994d-9314e6b60ca8
+
+	measure 'DGP # SmartSell' = SUM(fct_dgp_smartsell[actual_smartsell])
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: 1dd36a9b-98c0-4843-b23c-06c0bcfb00c6
+
+	measure 'QDGP # Value Target' =
+			
+			CALCULATE(
+			    SUM( vn_indirect_coverage[coverage_ind_L1M] ) * 16,
+			    dim_indirect_store[sub_channel_name] = "WHOLESALER: HYPER/ SUPER/ HFS"
+			)
+		formatString: #,0
+		displayFolder: 04 QDGP
+		lineageTag: eef5bc25-258a-4fe3-90bd-56b42197826c
+
+	measure 'IGP # Value' = SUM(fct_igp[Indirect NIV Shipments])
+		formatString: #,0
+		displayFolder: 05 IGP
+		lineageTag: 9a5a7826-45bc-4b0e-9eee-f3b66641e614
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'SOS # Value' =
+			
+			CALCULATE(
+			    SUM(vn_ir_sos_sod_actual[avg total]),
+			    vn_ir_sos_sod_actual[type] = "SOS"
+			)
+		formatString: #,0.00
+		displayFolder: 06 SOS
+		lineageTag: e31fca90-be93-4df2-94c5-4e6ce7209317
+
+	measure 'SOD # Value' =
+			
+			CALCULATE(
+			    SUM(vn_ir_sos_sod_actual[avg total]),
+			    vn_ir_sos_sod_actual[type] = "SOD"
+			)
+		formatString: #,0
+		displayFolder: 07 SOD
+		lineageTag: 50a1b31c-a375-4fc3-91b8-23c4ff4b91a3
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'SOS # Value Target' =
+			
+			CALCULATE(
+			    SUM(vn_ir_sos_sod_target[avg total]),
+			    vn_ir_sos_sod_target[type_total] = "SOS"
+			)
+		formatString: #,0.00
+		displayFolder: 06 SOS
+		lineageTag: 3cda1b14-486a-49f9-9527-c628cefbc35a
+
+	measure 'SOD # Value Target' =
+			
+			CALCULATE(
+			    SUM(vn_ir_sos_sod_target[avg total]),
+			    vn_ir_sos_sod_target[type_total] = "SOD"
+			)
+		formatString: #,0
+		displayFolder: 07 SOD
+		lineageTag: 81ed7c37-c9d8-4272-9666-1c7ccc69a6fe
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'VGP # Value' = SUM(vn_vgp_actual[actual])
+		displayFolder: 08 VGP
+		lineageTag: 525aafd0-a9fa-4c83-bd3a-b7db3a2bdad8
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Value' = ```
+			
+			VAR _LANCHI = 
+			SUM( 'share_value_fct_Lan Chi'[Value]) * 1.08 
+			VAR _POS = 
+			CALCULATE(
+			    [Sellout # Value POS],
+			    dim_pos_store[sub_channel] <> "Bach Hoa Xanh")
+			RETURN
+			(_LANCHI + _POS)*10^9
+			```
+		displayFolder: 11 Value Share
+		lineageTag: d3582f43-1549-495b-8f70-02c9de5566d0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Total' =
+			
+			SUM(share_value_fct_total[Value]) * 1.08
+		formatString: #,0
+		displayFolder: 11 Value Share
+		lineageTag: ee571f5c-9369-49d3-8854-4620212caf9a
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Value Share # Percentage' = ```
+			
+			CALCULATE(
+			    DIVIDE(
+			        [Value Share # Value], 
+			        [Value Share # Total]
+			    ),
+			    share_value_fct_total[value] >0
+			)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 11 Value Share
+		lineageTag: 7eabe206-8d14-4507-a874-ddc9855e781c
+
+	measure 'Shipment # Volume' = SUM(vn_direct_shipment_fct[shipment_su]) / 10^3
+		displayFolder: 01 Shipment
+		lineageTag: 41286541-6124-48a4-a4b1-119ba93d969e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume FYTD' = ```
+			
+			CALCULATE(
+			    [Shipment # Volume],
+			    DATESYTD( vn_calendar[date] , "6-30") 
+			)
+			```
+		displayFolder: 01 Shipment
+		lineageTag: 4c850f6a-6ad3-418a-8f05-984378d313bc
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume FYTD PY' =
+			
+			CALCULATE(
+			    [Shipment # Volume FYTD],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 01 Shipment
+		lineageTag: 206c4d93-ac8d-4d9e-91e0-1b38f458c0d0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume FYTD IYA' =
+			
+			DIVIDE([Shipment # Volume FYTD],[Shipment # Volume FYTD PY]) * 100
+		displayFolder: 01 Shipment
+		lineageTag: 312c91c8-6255-4846-b24c-83bbe5561f88
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [Shipment # Volume],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			RETURN
+			DIVIDE( _JAS_Value , _JAS_Month_Num * 3)
+			```
+		displayFolder: 01 Shipment
+		lineageTag: 45d85330-273c-4b24-8fe4-9925eb78801d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume vs. JAS' =
+			
+			DIVIDE(
+			    [Shipment # Volume] - [Shipment # Volume JAS],
+			    [Shipment # Volume JAS]
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 01 Shipment
+		lineageTag: cf304e5e-ba9c-4361-af37-1550f0804201
+
+	measure 'Shipment # Value PY' =
+			
+			CALCULATE(
+			    [Shipment # Value],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 01 Shipment
+		lineageTag: 7d21f08a-dcd9-45bc-a555-e19e24b0d3d9
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value IYA' =
+			
+			DIVIDE( [Shipment # Value], [Shipment # Value PY]) * 100
+		displayFolder: 01 Shipment
+		lineageTag: 7684ed0f-812a-4ff2-a24c-9795f18c55ae
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume PY' =
+			
+			CALCULATE(
+			    [Shipment # Volume],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 01 Shipment
+		lineageTag: 57cfeb65-d03a-4ae0-b2f2-88c15c44f163
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume IYA %' =
+			
+			DIVIDE( [Shipment # Volume], [Shipment # Volume PY]) * 100
+		displayFolder: 01 Shipment
+		lineageTag: a4c984ac-e04b-47eb-b92c-ea2c6cdd37d2
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Shipment # Value],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 01 Shipment
+		lineageTag: 047e0b56-02b0-4214-8794-f95f99931824
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Text # Period Last 12 Months' = ```
+			
+			 FORMAT(EDATE(MAX(vn_calendar[date]),-12), "MMM'YY") & "-" & FORMAT(MAX(vn_calendar[date]), "MMM'YY")
+			```
+		displayFolder: 99 Other
+		lineageTag: 9a946027-beb4-4d03-9dd4-f4e2b7556697
+
+	measure 'Last refresh' =
+			
+			CALCULATE(
+			    MAX(vn_direct_shipment_fct[day_date]),
+			    ALL(vn_calendar),
+			    NOT ISBLANK(vn_direct_shipment_fct[shipment_giv_value])
+			)
+		formatString: mmmm d\, yyyy
+		displayFolder: 99 Other
+		lineageTag: 6e184392-3c5e-49bd-b3b5-fc18b3de4645
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	measure 'Shipment # Value Target' = (SUM(vn_direct_shipment_target_fct[giv_target])/ 10^9)
+		displayFolder: 01 Shipment
+		lineageTag: 3b453279-6678-403c-a9e8-a8f714908ba1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Card # Shipment Period | Shipment Value' = ```
+			
+			VAR _Num_Month = DISTINCTCOUNT(vn_calendar[yearmonth])
+			VAR _All_Month =
+			    CALCULATE(
+			        DISTINCTCOUNT(vn_calendar[yearmonth]),
+			        ALL(vn_calendar)
+			    )
+			VAR _Text = 
+			SWITCH(
+			    TRUE(),
+			    _Num_Month = _All_Month, "Bil | All",
+			    _Num_Month = 1, "Bil | " & FORMAT(MAX(vn_calendar[date]), "MMM'YY"),
+			    _Num_Month > 1, "Bil | " & FORMAT( MIN(vn_calendar[date]), "MMM'YY" ) & "-" & FORMAT( MAX(vn_calendar[date]), "MMM'YY" )
+			)
+			RETURN
+			_Text 
+			```
+		displayFolder: 99 Other
+		lineageTag: c6074d70-6ba0-4867-aa67-f54919c6c368
+
+	measure 'KPI Card | Value Target Reference' = ```
+			
+			VAR _Metric_Variance = [Shipment # Value Target Achievement]
+			VAR _Metric_Growth = [Shipment # Value Target % Achievement]
+			
+			VAR _Format_Variance = "▲ +#.00; ▼ -#.00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 01 Shipment
+		lineageTag: e1e4ef84-a301-423c-abff-c9a508ceae8a
+
+	measure 'Shipment # Value vs.PY' = ```
+			
+			DIVIDE( 
+			    [Shipment # Value] - [Shipment # Value PY],
+			    [Shipment # Value PY],
+			    0
+			)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 01 Shipment
+		lineageTag: 586bcb60-516e-48cd-af41-01587ee64a1d
+
+	measure 'KPi Card | Value Target Reference Colour' =
+			
+			IF(
+			    [Shipment # Value Target % Achievement] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 01 Shipment
+		lineageTag: 51286219-3864-4c9c-a99d-429e299c877b
+
+	measure 'Shipment # Value Target Achievement' = [Shipment # Value] - [Shipment # Value Target]
+		displayFolder: 01 Shipment
+		lineageTag: 1bfd6038-70cb-4ac6-b2b7-7f833364c3c9
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value Target % Achievement' =
+			
+			DIVIDE(
+			    [Shipment # Value] - [Shipment # Value Target],
+			    [Shipment # Value Target],
+			    0
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 01 Shipment
+		lineageTag: 283d5cec-3ee2-4cf3-8f13-c8e712e578cf
+
+	measure 'KPI Card | Value PY Reference' = ```
+			
+			VAR _Metric_Variance = [Shipment # Value] - [Shipment # Value PY]
+			VAR _Metric_Growth = [Shipment # Value vs.PY]
+			
+			VAR _Format_Variance = "▲ +#.00; ▼ -#.00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 01 Shipment
+		lineageTag: 9c88b315-5696-4083-b595-8d01dbdd8431
+
+	measure 'KPI Card | Value PY Reference Colour' =
+			
+			IF(
+			    [Shipment # Value vs.PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 01 Shipment
+		lineageTag: 82247df2-f251-4c8e-b17c-48406a950fab
+
+	measure 'Card # Shipment Period | Shipment Volume' = ```
+			
+			VAR _Num_Month = DISTINCTCOUNT(vn_calendar[yearmonth])
+			VAR _All_Month =
+			    CALCULATE(
+			        DISTINCTCOUNT(vn_calendar[yearmonth]),
+			        ALL(vn_calendar)
+			    )
+			VAR _Text = 
+			SWITCH(
+			    TRUE(),
+			    _Num_Month = _All_Month, "MSU | All",
+			    _Num_Month = 1, "MSU | " & FORMAT(MAX(vn_calendar[date]), "MMM'YY"),
+			    _Num_Month > 1, "MSU | " & FORMAT( MIN(vn_calendar[date]), "MMM'YY" ) & "-" & FORMAT( MAX(vn_calendar[date]), "MMM'YY" )
+			)
+			RETURN
+			_Text 
+			```
+		displayFolder: 99 Other
+		lineageTag: 49fc1372-d783-46f3-a368-02436e23f55b
+
+	measure 'Shipment # Volume IYA vs. PY' = ```
+			
+			DIVIDE( 
+			    [Shipment # Volume] - [Shipment # Volume PY],
+			    [Shipment # Volume PY],
+			    0
+			)
+			```
+		displayFolder: 01 Shipment
+		lineageTag: 0e26b7e9-b6be-462d-a8f9-99431c464b8a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card | Volume PY Reference' = ```
+			
+			VAR _Metric_Variance = [Shipment # Volume] - [Shipment # Volume PY]
+			VAR _Metric_Growth = [Shipment # Volume IYA vs. PY]
+			
+			VAR _Format_Variance = "▲ +#.00; ▼ -#.00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 01 Shipment
+		lineageTag: ac03e8ab-c877-40c5-8c8d-0f994ce85b14
+
+	measure 'KPI Card | Volume PY Reference Colour' =
+			
+			IF(
+			    [Shipment # Volume IYA vs. PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 01 Shipment
+		lineageTag: 76489a37-a102-4fa0-9a7b-ba74b675746d
+
+	measure 'Shipment # Value Target L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Shipment # Value Target],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 01 Shipment
+		lineageTag: e60f112e-03b9-4a19-ae32-a11a25b27514
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Shipment # Value PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 01 Shipment
+		lineageTag: 9d292f08-3345-4e33-9441-eeb06a2f6999
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Selected Row-breakdown Fields' =
+			
+			"Search by Name ("&
+			CONCATENATEX(
+			    VALUES('Row break-down analysis'[Name]),
+			    'Row break-down analysis'[Name],
+			    ", "
+			)&
+			")"
+		displayFolder: 99 Other
+		lineageTag: 70728b38-3878-4ab6-ae2d-a3e92e29f3e2
+
+	measure 'Shipment # Value ∆PY' = [Shipment # Value] - [Shipment # Value PY]
+		displayFolder: 01 Shipment
+		lineageTag: 792c7db2-f6cf-423e-828b-daf07a65b5d5
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Shipment # Value ∆TG' = [Shipment # Value] - [Shipment # Value Target]
+		displayFolder: 01 Shipment
+		lineageTag: b7440e80-7fc1-4fab-8e76-bcca583b0b10
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Shipment # Value ∆PY%' =
+			
+			DIVIDE(
+			    [Shipment # Value] - [Shipment # Value PY],
+			    [Shipment # Value PY],
+			    0
+			)
+		displayFolder: 01 Shipment
+		lineageTag: 26be4ea0-0b42-459d-9a2c-1891a16e7634
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Shipment # Value ∆TG%' =
+			
+			DIVIDE(
+			    [Shipment # Value] - [Shipment # Value Target],
+			    [Shipment # Value Target],
+			    0
+			)
+		displayFolder: 01 Shipment
+		lineageTag: 01879337-58a3-40f8-ad57-0679a395e21f
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Shipment # Value ∆PY | Normal Format' = [Shipment # Value] - [Shipment # Value PY]
+		displayFolder: 01 Shipment
+		lineageTag: 7cde860e-37f6-4513-815e-329bf415ff8c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value ∆TG | Normal Format' = [Shipment # Value] - [Shipment # Value Target]
+		displayFolder: 01 Shipment
+		lineageTag: 0d587a08-a89f-498a-ba10-3d948a4d0139
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value FYTD L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Shipment # Value FYTD],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 01 Shipment
+		lineageTag: 2dc9a63f-864c-4c3f-9d42-63bb9317f742
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # FYTD PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Shipment # Value FYTD PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 01 Shipment
+		lineageTag: 27a10896-b7cd-420e-9736-df0d507f39b6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # FYTD Target L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Shipment # Value Target FYTD],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 01 Shipment
+		lineageTag: e005c3d4-5c93-4f31-bfd1-7c1bb58389a3
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value Target FYTD' =
+			
+			CALCULATE(
+			    [Shipment # Value Target],
+			    DATESYTD(vn_calendar[date], "6-30")
+			)
+		displayFolder: 01 Shipment
+		lineageTag: 100e53fd-1df1-4c5c-8c30-2d227a9e557b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value P3M' =
+			
+			CALCULATE(
+			    [Shipment # Value],
+			    DATESINPERIOD(
+			        vn_calendar[date],
+			        MAX( vn_calendar[date]),
+			        -3,
+			        MONTH
+			    )
+			)
+		displayFolder: 01 Shipment
+		lineageTag: 1901a088-00b9-4008-8fc8-c07344364377
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value FYTD ∆PY' = [Shipment # Value FYTD] - [Shipment # Value FYTD PY]
+		displayFolder: 01 Shipment
+		lineageTag: ad2fd77e-d42b-406a-b0f9-a67584ec16e2
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Shipment # Value FYTD ∆PY | Normal Format' = [Shipment # Value FYTD] - [Shipment # Value FYTD PY]
+		formatString: #,0.00
+		displayFolder: 01 Shipment
+		lineageTag: 9ffecac7-af0d-4b81-be1b-919264405e98
+
+	measure 'Shipment # Value FYTD ∆PY%' =
+			
+			DIVIDE(
+			    [Shipment # Value FYTD] - [Shipment # Value FYTD PY],
+			    [Shipment # Value FYTD PY],
+			    0
+			)
+		displayFolder: 01 Shipment
+		lineageTag: ad76d4c9-223a-4057-820f-11e8154d104b
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Table | Selected Row-breakdown Title Name' =
+			
+			"Shipment structure by "&
+			CONCATENATEX(
+			    VALUES('Row break-down analysis'[Name]),
+			    'Row break-down analysis'[Name],
+			    ", "
+			)
+		displayFolder: 99 Other
+		lineageTag: c82a0a21-c187-4826-8cff-ae62bdb6d1a9
+
+	measure 'Shipment # Volume L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Shipment # Volume],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 01 Shipment
+		lineageTag: e31fd1db-eb0d-4f68-a4fa-aebf94199b06
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume Target' =
+			
+			SUM(
+			    vn_direct_shipment_target_fct[msu_target]
+			) / 10^3
+		displayFolder: 01 Shipment
+		lineageTag: 7c4e7b85-3cd4-4741-8a20-49f52a256d7e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Shipment # Volume PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 01 Shipment
+		lineageTag: 9c9ed1a3-9e0e-40de-b35d-00ad36613ba2
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume Target L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Shipment # Volume Target],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 01 Shipment
+		lineageTag: d3688e73-f466-4804-92e7-570559b58287
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card | Volume Target Reference' = ```
+			
+			VAR _Metric_Variance = [Shipment # Volume Target Achievement]
+			VAR _Metric_Growth = [Shipment # Volume Target % Achievement]
+			
+			VAR _Format_Variance = "▲ +#.00; ▼ -#.00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 01 Shipment
+		lineageTag: 466dd965-8b44-4f48-a15f-227be312e0bd
+
+	measure 'Shipment # Volume Target Achievement' = [Shipment # Volume] - [Shipment # Volume Target]
+		displayFolder: 01 Shipment
+		lineageTag: 9c953f63-ca23-48d9-919d-9cb92f93fea9
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume Target % Achievement' =
+			
+			DIVIDE(
+			    [Shipment # Volume] - [Shipment # Volume Target],
+			    [Shipment # Volume Target],
+			    0
+			)
+		displayFolder: 01 Shipment
+		lineageTag: b6a3d26c-7320-4b6a-af0b-65fe80f25801
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPi Card | Volume Target Reference Colour' =
+			
+			IF(
+			    [Shipment # Volume Target % Achievement] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 01 Shipment
+		lineageTag: bceb8cfb-253a-452d-9b22-8388bc5d00cf
+
+	measure 'Shipment # Volume ∆PY' = [Shipment # Volume] - [Shipment # Volume PY]
+		displayFolder: 01 Shipment
+		lineageTag: f901ae3c-98a3-40f9-98d9-55403abf2618
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Shipment # Volume ∆PY%' =
+			
+			DIVIDE(
+			    [Shipment # Volume] - [Shipment # Volume PY],
+			    [Shipment # Volume PY],
+			    0
+			)
+		displayFolder: 01 Shipment
+		lineageTag: 251c302d-93d7-40bf-a301-677c756ac071
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Shipment # Volume ∆TG' = [Shipment # Volume] - [Shipment # Volume Target]
+		displayFolder: 01 Shipment
+		lineageTag: f1fe32f9-cc18-4751-934b-3311a5a8f92b
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Shipment # Volume ∆TG%' =
+			
+			DIVIDE(
+			    [Shipment # Volume] - [Shipment # Volume Target],
+			    [Shipment # Volume Target],
+			    0
+			)
+		displayFolder: 01 Shipment
+		lineageTag: a0be9bdb-4d42-42ac-8990-4a88655d6d52
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Shipment # Volume ∆PY | Normal Format' = [Shipment # Volume] - [Shipment # Volume PY]
+		displayFolder: 01 Shipment
+		lineageTag: d665f1b5-78f6-44a9-9c0a-3dad2be612f9
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Volume ∆TG | Normal Format' = [Shipment # Volume] - [Shipment # Volume Target]
+		displayFolder: 01 Shipment
+		lineageTag: 9fd4d702-3e35-4b9e-9a20-a1277a02c285
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Shipment # Value FYTD ∆TG' = [Shipment # Value FYTD] - [Shipment # Value Target FYTD]
+		displayFolder: 01 Shipment
+		lineageTag: 1b92a38f-022a-48cb-a47d-053d07fa9f84
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Shipment # Value FYTD ∆TG%' =
+			
+			DIVIDE(
+			    [Shipment # Value FYTD] - [Shipment # Value Target FYTD],
+			    [Shipment # Value Target FYTD],
+			    0
+			)
+		displayFolder: 01 Shipment
+		lineageTag: be2b2cb6-1adc-4a3a-a859-bee0bcdd20f2
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Shipment # Value FYTD ∆TG | Normal Format' = [Shipment # Value FYTD] - [Shipment # Value Target FYTD]
+		displayFolder: 01 Shipment
+		lineageTag: b1e73287-e1f7-4997-8944-886189016b81
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC PY' =
+			
+			CALCULATE(
+			    [Sellout # Value RTDC],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 02 Sellout
+		lineageTag: 1c8d6db8-6c87-4c4e-aa24-0dda240e9003
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC ∆PY' = [Sellout # Value RTDC] - [Sellout # Value RTDC PY]
+		displayFolder: 02 Sellout
+		lineageTag: f9d5b3b7-d4c9-4d98-9581-3e9e99a433e6
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Sellout # Value RTDC ∆PY%' =
+			
+			DIVIDE(
+			    [Sellout # Value RTDC] - [Sellout # Value RTDC PY],
+			    [Sellout # Value RTDC PY],
+			    0
+			)
+		displayFolder: 02 Sellout
+		lineageTag: 3f1f7ca3-2fec-4fd9-9c33-0b21f8d246df
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'KPI Card Sellout | Value RTDC PY Reference' = ```
+			
+			VAR _Metric_Variance = [Sellout # Value RTDC] - [Sellout # Value RTDC PY]
+			VAR _Metric_Growth = [Sellout # Value RTDC vs.PY]
+			
+			VAR _Format_Variance = "▲ +#.00; ▼ -#.00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 90356791-c4e0-4917-9e5a-c207748ccdef
+
+	measure 'Sellout # Value RTDC vs.PY' = ```
+			
+			DIVIDE( 
+			    [Sellout # Value RTDC] - [Sellout # Value RTDC PY],
+			    [Sellout # Value RTDC PY],
+			    0
+			)
+			```
+		displayFolder: 02 Sellout
+		lineageTag: b3dd8477-214c-4aa6-b112-64ae69fed617
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card Sellout | Value RTDC PY Reference Colour' =
+			
+			IF(
+			    [Sellout # Value RTDC vs.PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 02 Sellout
+		lineageTag: 0988372c-c3d1-46fa-84ea-a6fc22f303ca
+
+	measure 'Sellout # Value POS PY' =
+			
+			CALCULATE(
+			    [Sellout # Value POS],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 02 Sellout
+		lineageTag: edfaa718-b7f8-4ff5-92f5-301adc0b8690
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS ∆PY' = [Sellout # Value POS] - [Sellout # Value POS PY]
+		displayFolder: 02 Sellout
+		lineageTag: 7bc2565b-911a-43d4-a315-e03304913cbc
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Sellout # Value POS ∆PY%' =
+			
+			DIVIDE(
+			    [Sellout # Value POS] - [Sellout # Value POS PY],
+			    [Sellout # Value POS PY],
+			    0
+			)
+		displayFolder: 02 Sellout
+		lineageTag: 84a5afbb-f8d9-4b4a-b1d6-cdaa72e73a19
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Sellout # Value POS vs.PY' = ```
+			
+			DIVIDE( 
+			    [Sellout # Value POS] - [Sellout # Value POS PY],
+			    [Sellout # Value POS PY],
+			    0
+			)
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 82209ca7-ee0d-438b-ae7b-3d781712af11
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card Sellout | Value POS PY Reference' = ```
+			
+			VAR _Metric_Variance = [Sellout # Value POS] - [Sellout # Value POS PY]
+			VAR _Metric_Growth = [Sellout # Value POS vs.PY]
+			
+			VAR _Format_Variance = "▲ +#.00; ▼ -#.00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 94d77ec7-b7e3-437e-861b-884a7ed2d35c
+
+	measure 'KPI Card Sellout | Value POS PY Reference Colour' =
+			
+			IF(
+			    [Sellout # Value POS vs.PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 02 Sellout
+		lineageTag: a21ba7ee-ede2-4956-8ffc-1f089d9f3e4a
+
+	measure 'Sellout # Value RTDC L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Sellout # Value RTDC],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 02 Sellout
+		lineageTag: 6430dc4c-6c7a-4546-8382-6855942872ad
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Sellout # Value POS],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 02 Sellout
+		lineageTag: bf80a787-e469-426d-bb07-a5bfe391d2ef
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Sellout # Value RTDC PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 02 Sellout
+		lineageTag: 04fa3a79-07f2-4323-b7a4-9b975e90e719
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Sellout # Value POS PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 02 Sellout
+		lineageTag: aa3de25f-61df-436c-815f-1ad85be5dfd4
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC ∆PY | Normal Format' = [Sellout # Value RTDC] - [Sellout # Value RTDC PY]
+		displayFolder: 02 Sellout
+		lineageTag: 1dd9d383-482e-4832-870a-e1ed62c54d09
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS ∆PY | Normal Format' = [Sellout # Value POS] - [Sellout # Value POS PY]
+		displayFolder: 02 Sellout
+		lineageTag: 0d73b605-7315-4b2e-bf6f-06436663b071
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC FYTD' = ```
+			
+			CALCULATE(
+			    [Sellout # Value RTDC],
+			    DATESYTD( vn_calendar[date] , "6-30") 
+			)
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 28d94432-b54f-4312-a39f-11301473574c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC FYTD ∆PY' = [Sellout # Value RTDC FYTD] - [Sellout # Value RTDC FYTD PY]
+		displayFolder: 02 Sellout
+		lineageTag: 32315a49-94a5-451c-ad8a-93a552ae19aa
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Sellout # Value RTDC FYTD PY' =
+			
+			CALCULATE(
+			    [Sellout # Value RTDC FYTD],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 02 Sellout
+		lineageTag: 0f82d857-aed0-48ec-a550-699dc6cea526
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC FTYD ∆PY | Normal Format' = [Sellout # Value RTDC FYTD] - [Sellout # Value RTDC FYTD PY]
+		displayFolder: 02 Sellout
+		lineageTag: 091369ae-6056-4524-834c-5d50c4d5f291
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC FYTD ∆PY%' =
+			
+			DIVIDE(
+			    [Sellout # Value RTDC FYTD] - [Sellout # Value RTDC FYTD PY],
+			    [Sellout # Value RTDC FYTD PY],
+			    0
+			)
+		displayFolder: 02 Sellout
+		lineageTag: b126a6f2-f0d1-48c0-a269-098cadb3418e
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Sellout # Value POS FYTD ∆PY' = [Sellout # Value POS FYTD] - [Sellout # Value POS FYTD PY]
+		displayFolder: 02 Sellout
+		lineageTag: aae1437d-b724-4d84-a493-d9256842c7f1
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Sellout # Value POS FYTD' = ```
+			
+			CALCULATE(
+			    [Sellout # Value POS],
+			    DATESYTD( vn_calendar[date] , "6-30") 
+			)
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 48459a6e-e500-4b95-a017-4f832a68b7be
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS FYTD PY' =
+			
+			CALCULATE(
+			    [Sellout # Value POS FYTD],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 02 Sellout
+		lineageTag: de318de6-5751-408b-91b4-d20d91ffa92d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS FYTD ∆PY | Normal Format' = [Sellout # Value POS FYTD] - [Sellout # Value POS FYTD PY]
+		displayFolder: 02 Sellout
+		lineageTag: 17377b0b-dca1-417b-b68c-4d7814138272
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS FYTD ∆PY%' =
+			
+			DIVIDE(
+			    [Sellout # Value POS FYTD] - [Sellout # Value POS FYTD PY],
+			    [Sellout # Value POS FYTD PY],
+			    0
+			)
+		displayFolder: 02 Sellout
+		lineageTag: 6ac9c2a9-4352-4ce1-80ce-3e7d8089a15f
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Sellout # Value RTDC IYA' =
+			
+			DIVIDE([Sellout # Value RTDC] , [Sellout # Value RTDC PY])
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: a1604938-2966-4957-8361-3ea8d25f3092
+
+	measure 'Sellout # Value RTDC P3M' = ```
+			
+			VAR _actual = 
+			CALCULATE(
+			    [Sellout # Value RTDC],
+			    DATESINPERIOD(
+			        vn_calendar[date],
+			        MAX( vn_calendar[date]),
+			        -3,
+			        MONTH
+			    )
+			)
+			RETURN
+			_actual / 3
+			```
+		displayFolder: 02 Sellout
+		lineageTag: f9b90ab9-c383-400d-826d-b8e8aa2180ca
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC ∆P3M' = [Sellout # Value RTDC] - [Sellout # Value RTDC P3M]
+		displayFolder: 02 Sellout
+		lineageTag: d5444197-6474-4cc8-9f8b-f9696a83dbf6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC ∆P3M%' =
+			
+			DIVIDE([Sellout # Value RTDC], [Sellout # Value RTDC P3M])
+		displayFolder: 02 Sellout
+		lineageTag: 4e11d05b-7370-4aef-b056-f869d7efe1f2
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Sellout # Value RTDC P6M' = ```
+			
+			VAR _actual = 
+			CALCULATE(
+			    [Sellout # Value RTDC],
+			    DATESINPERIOD(
+			        vn_calendar[date],
+			        MAX( vn_calendar[date]),
+			        -6,
+			        MONTH
+			    )
+			)
+			RETURN
+			_actual / 6
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 8bd71ddf-c420-4104-94fe-ffd05d043eda
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC ∆P6M' = [Sellout # Value RTDC] - [Sellout # Value RTDC P6M]
+		displayFolder: 02 Sellout
+		lineageTag: 993ba006-65dc-40e9-b98a-962b7c8d4a54
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC ∆P6M%' =
+			
+			DIVIDE([Sellout # Value RTDC], [Sellout # Value RTDC P6M])
+		displayFolder: 02 Sellout
+		lineageTag: b13632af-f14d-4c6f-b6d1-c4c98ec1985b
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Sellout # Value POS P3M' = ```
+			
+			VAR _actual = 
+			CALCULATE(
+			    [Sellout # Value POS],
+			    DATESINPERIOD(
+			        vn_calendar[date],
+			        MAX( vn_calendar[date]),
+			        -3,
+			        MONTH
+			    )
+			)
+			RETURN
+			_actual / 3
+			```
+		displayFolder: 02 Sellout
+		lineageTag: a8c57995-45ba-4a02-b174-acb6d1488077
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS P6M' = ```
+			
+			VAR _actual = 
+			CALCULATE(
+			    [Sellout # Value POS],
+			    DATESINPERIOD(
+			        vn_calendar[date],
+			        MAX( vn_calendar[date]),
+			        -6,
+			        MONTH
+			    )
+			)
+			RETURN
+			_actual / 6
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 6d344f9b-4a29-4eca-aef5-d926790546c3
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value POS ∆P3M' = [Sellout # Value POS] - [Sellout # Value POS P3M]
+		displayFolder: 02 Sellout
+		lineageTag: 26e648a1-dbbf-4ea7-9603-42cb9121f330
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Sellout # Value POS ∆P3M%' =
+			
+			DIVIDE([Sellout # Value POS], [Sellout # Value POS P3M])
+		displayFolder: 02 Sellout
+		lineageTag: 0f42c906-e047-443d-9dc4-3cf7327f1d3f
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Sellout # Value POS ∆P6M' = [Sellout # Value POS] - [Sellout # Value POS P6M]
+		displayFolder: 02 Sellout
+		lineageTag: f58c453c-c4ff-4b23-adfd-9bd0c429aa21
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'Sellout # Value POS ∆P6M%' =
+			
+			DIVIDE([Sellout # Value POS], [Sellout # Value POS P6M])
+		displayFolder: 02 Sellout
+		lineageTag: a3585350-956f-4f40-b5a2-4a0afcbec2d0
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'KPI Card DGP | PY Reference' = ```
+			
+			VAR _Metric_Variance = [DGP # Value] - [DGP # Value PY]
+			VAR _Metric_Growth = [QDGP # Value vs.PY]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 03 DGP
+		lineageTag: 919e67a3-db56-48ae-a782-b118f003d1e5
+
+	measure 'DGP # Value ∆PY' = [DGP # Value] - [DGP # Value PY]
+		displayFolder: 03 DGP
+		lineageTag: 7e249e47-cb75-40eb-b7b3-0a6dddfa2b18
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'DGP # Value' = [DGP # RTDC] + [DGP # POS] + [DGP # SmartSell]
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: 40bbd5cc-8127-448d-8c86-e84aa1b2f861
+
+	measure 'DGP # Value PY' =
+			
+			CALCULATE(
+			    [DGP # Value],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: 848af301-b143-4321-ab3b-2b69d689254c
+
+	measure 'KPI Card DGP | Value PY Reference Colour' =
+			
+			IF(
+			    [DGP # Value ∆PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 03 DGP
+		lineageTag: 4bb5d60a-0b32-48b6-bd1a-58f6fb01af50
+
+	measure 'DGP # Value L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [DGP # Value],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: a18d2ed6-b1ef-4df5-b31a-f4078b5bfa92
+
+	measure 'DGP # Value PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [DGP # Value PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0
+		displayFolder: 03 DGP
+		lineageTag: b42796cf-103f-4e3d-9221-1c20d23531b1
+
+	measure 'QDGP # Value PY' =
+			
+			CALCULATE(
+			    [QDGP # Value],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		formatString: #,0
+		displayFolder: 04 QDGP
+		lineageTag: eef465a1-4cbd-4ced-914e-92ec722daa79
+
+	measure 'QDGP # Value Target % Achievement' =
+			
+			DIVIDE(
+			    [QDGP # Value] - [QDGP # Value Target],
+			    [QDGP # Value Target],
+			    0
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: 80793845-45c6-4335-a2af-3b8eedeffa62
+
+	measure 'KPI Card QDGP | Value PY Reference Colour' =
+			
+			IF(
+			    [QDGP # Value vs.PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 04 QDGP
+		lineageTag: e93edce0-1b26-46e4-b043-f0adc0ede1ff
+
+	measure 'QDGP # Value Target Achievement' = [QDGP # Value] - [QDGP # Value Target]
+		displayFolder: 04 QDGP
+		lineageTag: e59a22b3-26c3-4b3d-980b-674d622a8ee0
+
+	measure 'KPI Card QDGP | PY Reference' = ```
+			
+			VAR _Metric_Variance = [QDGP # Value] - [QDGP # Value PY]
+			VAR _Metric_Growth = [QDGP # Value vs.PY]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 04 QDGP
+		lineageTag: c24d9949-8185-4ad4-b372-df527db24286
+
+	measure 'KPI Card QDGP | Value Target Reference' = ```
+			
+			VAR _Metric_Variance = [QDGP # Value Target Achievement]
+			VAR _Metric_Growth = [QDGP # Value Target % Achievement]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 04 QDGP
+		lineageTag: 424c31c0-4b17-413f-b2d3-2314e9548a5d
+
+	measure 'KPi Card QDGP | Value Target Reference Colour' =
+			
+			IF(
+			    [QDGP # Value Target % Achievement] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 04 QDGP
+		lineageTag: 5de956f1-1d96-4445-b38e-138ce4394bcc
+
+	measure 'QDGP # Value Target Index Achievement' =
+			
+			DIVIDE(
+			    [QDGP # Value], [QDGP # Value Target] , 0
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: 3bb78210-0dd6-4d67-ad4f-94420ce72198
+
+	measure 'QDGP # Value L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [QDGP # Value],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: #,0
+		displayFolder: 04 QDGP
+		lineageTag: b3539f34-943d-488b-87da-2536da5af40d
+
+	measure 'QDGP # Value PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [QDGP # Value PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0
+		displayFolder: 04 QDGP
+		lineageTag: 91a7986e-894e-4936-a8e4-eafba4cbb6b1
+
+	measure 'QDGP # Value Target L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _QDGP =
+			CALCULATE(
+			    [QDGP # Value Target],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_QDGP
+		formatString: 0
+		displayFolder: 04 QDGP
+		lineageTag: 5ab5c9e3-bf21-44a1-b53e-c80c37477106
+
+	measure 'SOS # Value L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [SOS # Value],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 06 SOS
+		lineageTag: 1a310c1e-e6c0-425b-8063-3e8b4bcffc8b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOS # Value PY' =
+			
+			CALCULATE(
+			    [SOS # Value],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 06 SOS
+		lineageTag: 151c4e16-64a4-4c7a-ba95-d2739ee8d321
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOS # Value PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [SOS # Value PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 06 SOS
+		lineageTag: 19021263-0dc8-449c-991c-10dfffb89871
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'QDGP # Value vs.PY' = ```
+			
+			DIVIDE( 
+			    [QDGP # Value] - [QDGP # Value PY],
+			    [QDGP # Value PY],
+			    0
+			)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: a0373dac-764e-4cee-8cc0-587c54383e12
+
+	measure 'KPI Card SOS | Value PY Reference' = ```
+			
+			VAR _Metric_Variance = [SOS # Value] - [SOS # Value PY]
+			VAR _Metric_Growth = [SOS # Value vs.PY]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 06 SOS
+		lineageTag: 7013582b-50aa-4e41-83e3-7abd804d300b
+
+	measure 'SOS # Value vs.PY' = ```
+			
+			DIVIDE( 
+			    [SOS # Value] - [SOS # Value PY],
+			    [SOS # Value PY],
+			    0
+			)
+			```
+		displayFolder: 06 SOS
+		lineageTag: 2ce63f5f-58f8-4fc0-925b-7aceaafada49
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card SOS | Value PY Reference Colour' =
+			
+			IF(
+			    [SOS # Value vs.PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 06 SOS
+		lineageTag: 05f88254-50c1-46bb-b9b9-28691fc7bcc1
+
+	measure 'SOS # Value Target L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _QDGP =
+			CALCULATE(
+			    [SOS # Value Target],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_QDGP
+		displayFolder: 06 SOS
+		lineageTag: bc97bbe2-890d-4357-b946-f99d199b7a35
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOS # Value Target Achievement' = [SOS # Value] - [SOS # Value Target]
+		displayFolder: 06 SOS
+		lineageTag: 38e4a65b-52f0-4109-8b12-038aed4bfd5d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOS # Value Target % Achievement' =
+			
+			DIVIDE(
+			    [SOS # Value] - [SOS # Value Target],
+			    [SOS # Value Target],
+			    0
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 06 SOS
+		lineageTag: ee1ddd98-42d1-48ab-99c7-e8ec1aa189a6
+
+	measure 'SOS # Value Target Index Achievement' =
+			
+			DIVIDE(
+			    [SOS # Value], [SOS # Value Target] , 0
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 06 SOS
+		lineageTag: b81eb7c5-14c8-46d6-a771-a3d68c152d1a
+
+	measure 'KPI Card SOS | Value Target Reference' = ```
+			
+			VAR _Metric_Variance = [SOS # Value Target Achievement]
+			VAR _Metric_Growth = [SOS # Value Target % Achievement]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 06 SOS
+		lineageTag: a8a0131d-61db-4654-81f5-049f8be078c7
+
+	measure 'KPi Card SOS | Value Target Reference Colour' =
+			
+			IF(
+			    [SOS # Value Target % Achievement] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 06 SOS
+		lineageTag: 06e50200-9b46-44d7-9ecf-e9cac424fe8a
+
+	measure 'SOD # Value L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [SOD # Value],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 07 SOD
+		lineageTag: e8fbd6e9-28a5-4b8d-807e-ccea6e3de7ff
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOD # Value PY' =
+			
+			CALCULATE(
+			    [SOD # Value],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 07 SOD
+		lineageTag: 3cc56623-784c-4d3a-9b1e-0dcd5c812ce7
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOD # Value PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [SOD # Value PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 07 SOD
+		lineageTag: 13cd9760-6731-4a27-8bef-9bf2b0aa56f3
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOD # Value Target Achievement' = [SOD # Value] - [SOD # Value Target]
+		displayFolder: 07 SOD
+		lineageTag: e2e613db-2a52-4935-a278-2111d7d5fa8c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOD # Value Target % Achievement' =
+			
+			DIVIDE(
+			    [SOD # Value] - [SOD # Value Target],
+			    [SOD # Value Target],
+			    0
+			)
+		displayFolder: 07 SOD
+		lineageTag: 8b0ec19e-3443-470c-871c-ecaa3d6a70c5
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOD # Value Target L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _QDGP =
+			CALCULATE(
+			    [SOD # Value Target],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_QDGP
+		displayFolder: 07 SOD
+		lineageTag: cdd89fe7-3a1f-47ea-96f4-151c65529e2b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOD # Value vs.PY' = ```
+			
+			DIVIDE( 
+			    [SOD # Value] - [SOD # Value PY],
+			    [SOD # Value PY],
+			    0
+			)
+			```
+		displayFolder: 07 SOD
+		lineageTag: 2dd5cfb2-74e8-4ab8-b136-1c475a001a17
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'DGP # Value ∆PY%' =
+			
+			DIVIDE(
+			    [DGP # Value] - [DGP # Value PY],
+			    [DGP # Value PY],
+			    0
+			)
+		displayFolder: 03 DGP
+		lineageTag: 613e1764-6104-466f-8b6d-850a3c2f276b
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'DGP # Value ∆PY | Normal Format' = [DGP # Value] - [DGP # Value PY]
+		formatString: 0
+		displayFolder: 03 DGP
+		lineageTag: 7e7d26eb-151c-4d71-a0bf-a160e9ecf6da
+
+	measure 'QDGP # Value ∆PY' = [QDGP # Value] - [QDGP # Value PY]
+		displayFolder: 04 QDGP
+		lineageTag: 9e16e929-55c4-4e71-a8ee-47e6c76d2cfb
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'QDGP # Value ∆PY | Normal Format' = [QDGP # Value] - [QDGP # Value PY]
+		formatString: 0
+		displayFolder: 04 QDGP
+		lineageTag: dce8ccc3-50f6-4e8c-bf86-ca0b868c14ed
+
+	measure 'QDGP # Value ∆PY%' =
+			
+			DIVIDE(
+			    [QDGP # Value] - [QDGP # Value PY],
+			    [QDGP # Value PY],
+			    0
+			)
+		displayFolder: 04 QDGP
+		lineageTag: d53012b1-76bf-42fe-a8bb-c884d2eff03c
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'QDGP # Value ∆TG' = [QDGP # Value] - [QDGP # Value Target]
+		displayFolder: 04 QDGP
+		lineageTag: 10ffce6e-38eb-4853-b996-9e8ae7cac73b
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'QDGP # Value ∆TG%' =
+			
+			DIVIDE(
+			    [QDGP # Value] - [QDGP # Value Target],
+			    [QDGP # Value Target],
+			    0
+			)
+		displayFolder: 04 QDGP
+		lineageTag: faf4a3b9-c49c-49d9-84a7-4f9cd4dbfdc9
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'QDGP # Value ∆TG | Normal Format' = [QDGP # Value] - [QDGP # Value Target]
+		formatString: 0
+		displayFolder: 04 QDGP
+		lineageTag: 03ae6dd5-d040-4453-9200-a9629caa0d43
+
+	measure 'SOS # Value ∆PY' = [SOS # Value] - [SOS # Value PY]
+		displayFolder: 06 SOS
+		lineageTag: 01d8d782-9f0d-4810-83c8-ad51adbb16b8
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'SOS # Value ∆PY | Normal Format' = [SOS # Value] - [SOS # Value PY]
+		displayFolder: 06 SOS
+		lineageTag: a596d231-3534-4612-8e72-5796ff91a4ea
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOS # Value ∆PY%' =
+			
+			DIVIDE(
+			    [SOS # Value] - [SOS # Value PY],
+			    [SOS # Value PY],
+			    0
+			)
+		displayFolder: 06 SOS
+		lineageTag: 87fd009f-580e-44a5-877b-ad8a67cc8b2b
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'SOS # Value ∆TG' = [SOS # Value] - [SOS # Value Target]
+		displayFolder: 06 SOS
+		lineageTag: eeb62375-90b7-4234-affd-6741cc20bd3c
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'SOS # Value ∆TG%' =
+			
+			DIVIDE(
+			    [SOS # Value] - [SOS # Value Target],
+			    [SOS # Value Target],
+			    0
+			)
+		displayFolder: 06 SOS
+		lineageTag: c6d6519c-a22a-4b42-86a3-4cb36c0778a9
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'SOS # Value ∆TG | Normal Format' = [SOS # Value] - [SOS # Value Target]
+		displayFolder: 06 SOS
+		lineageTag: d003ed9f-6fe9-4eae-94d0-88b3d8301305
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card SOD | Value PY Reference' = ```
+			
+			VAR _Metric_Variance = [SOD # Value] - [SOD # Value PY]
+			VAR _Metric_Growth = [SOD # Value vs.PY]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 07 SOD
+		lineageTag: 2beb6d60-a2ce-432a-9e82-d1135657a783
+
+	measure 'KPI Card SOD | Value PY Reference Colour' =
+			
+			IF(
+			    [SOD # Value vs.PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 07 SOD
+		lineageTag: 535a2d4c-a384-4135-b846-082e2b4b94dc
+
+	measure 'KPI Card SOD | Value Target Reference' = ```
+			
+			VAR _Metric_Variance = [SOD # Value Target Achievement]
+			VAR _Metric_Growth = [SOD # Value Target % Achievement]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 07 SOD
+		lineageTag: 2107b175-953e-496c-bbe6-abbc9663cbc7
+
+	measure 'KPI Card SOD | Value Target Reference Colour' =
+			
+			IF(
+			    [SOD # Value Target % Achievement] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 07 SOD
+		lineageTag: 0f5f8c2d-4be6-4a68-b81d-7c6655e326e3
+
+	measure 'VGP # Value PY' =
+			
+			CALCULATE(
+			    [VGP # Value],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 08 VGP
+		lineageTag: f1e2184a-e7e7-4585-ac56-4d45f66cc77c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'VGP # Value L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [VGP # Value],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 08 VGP
+		lineageTag: 7352d95d-28ea-4307-be2a-8920cffbf93a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'VGP # Value vs.PY' = ```
+			
+			DIVIDE( 
+			    [VGP # Value] - [VGP # Value PY],
+			    [VGP # Value PY],
+			    0
+			)
+			```
+		displayFolder: 08 VGP
+		lineageTag: f6d1224b-1be8-4135-86f8-6cc0c6a1d8fa
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card VGP | Value PY Reference' = ```
+			
+			VAR _Metric_Variance = [VGP # Value] - [VGP # Value PY]
+			VAR _Metric_Growth = [VGP # Value vs.PY]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 08 VGP
+		lineageTag: ed168717-19b4-432a-800a-2204a8cc5e24
+
+	measure 'KPI Card VGP | Value PY Reference Colour' =
+			
+			IF(
+			    [VGP # Value vs.PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 08 VGP
+		lineageTag: 54d51a7e-22bd-461f-a86f-019cc6bd67e4
+
+	measure 'VGP # Value Target' = SUM(vn_vgp_actual[total])
+		formatString: #,0
+		displayFolder: 08 VGP
+		lineageTag: 46a5ca29-b7bd-4041-a019-f9d60e4cde06
+
+	measure 'VGP # Value Target L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _QDGP =
+			CALCULATE(
+			    [VGP # Value Target],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_QDGP
+		formatString: 0
+		displayFolder: 08 VGP
+		lineageTag: 6db6f239-991e-489c-b8e5-8f847b46d790
+
+	measure 'VGP # Value Target Achievement' = [VGP # Value] - [VGP # Value Target]
+		displayFolder: 08 VGP
+		lineageTag: cfa0a9e5-cd79-45ad-a687-c35979127d8c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'VGP # Value Target % Achievement' =
+			
+			DIVIDE(
+			    [VGP # Value] - [VGP # Value Target],
+			    [VGP # Value Target],
+			    0
+			)
+		displayFolder: 08 VGP
+		lineageTag: 97e3da84-fd94-42d3-89fd-8712a959ae2e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card VGP | Value Target Reference' = ```
+			
+			VAR _Metric_Variance = [VGP # Value Target Achievement]
+			VAR _Metric_Growth = [VGP # Value Target % Achievement]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 08 VGP
+		lineageTag: 026c711f-d1e3-456e-8fd1-b7e3856a7fde
+
+	measure 'KPI Card VGP | Value Target Reference Colour' =
+			
+			IF(
+			    [VGP # Value Target % Achievement] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 08 VGP
+		lineageTag: 2f750bb3-5839-4eca-9ab4-b3c453601ae2
+
+	measure 'VGP # Value PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [VGP # Value PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 08 VGP
+		lineageTag: 7273d1b7-0e70-44fa-ad44-bf803b03f4f0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'IGP # Distribution' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT(fct_igp[greenline_key]),
+			    fct_igp[IGPGroup_Offtake] > 0
+			)
+		formatString: #,0
+		displayFolder: 05 IGP
+		lineageTag: 5cf98a1d-18a1-48be-ae0e-d57e06e4458b
+
+	measure 'IGP # Distribution Target' = ```
+			
+			VAR _table = 
+			SUMMARIZE(
+			    fct_igp,
+			    fct_igp[36 Customer.Corp Distributor Branch ID],
+			    fct_igp[20 Time.Month (Real)],
+			    fct_igp[61 Store.Route Identifier],
+			    fct_igp[new_product_group],
+			    "target", AVERAGE( fct_igp[Greenline Target] )
+			)
+			VAR _target = 
+			SUMX(_table, [target])
+			RETURN
+			_target
+			
+			```
+		formatString: #,0
+		displayFolder: 05 IGP
+		lineageTag: f1e0b905-9fdf-44e7-98b8-31e1aaa730fa
+
+	measure 'IGP # Distribution PY' =
+			
+			CALCULATE(
+			    [IGP # Distribution],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		formatString: #,0
+		displayFolder: 05 IGP
+		lineageTag: 3c0c2727-3667-4d97-9d40-ccacbabb154d
+
+	measure 'IGP # Distribution vs.PY' = ```
+			
+			DIVIDE( 
+			    [IGP # Distribution] - [IGP # Distribution PY],
+			    [IGP # Distribution PY],
+			    0
+			)
+			```
+		displayFolder: 05 IGP
+		lineageTag: d5a0d476-68bf-4aad-906f-07c787e4e620
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card IGP | PY Reference' = ```
+			
+			VAR _Metric_Variance = [IGP # Distribution] - [IGP # Distribution PY]
+			VAR _Metric_Growth = [IGP # Distribution vs.PY]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 05 IGP
+		lineageTag: 55c82256-e681-4939-981c-8b5ba6bbaf57
+
+	measure 'IGP # Distribution ∆PY' = [IGP # Distribution] - [IGP # Distribution PY]
+		displayFolder: 05 IGP
+		lineageTag: b39f0558-ffac-4b1d-8fe4-3d4d6afef499
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'KPI Card IGP | Distribution PY Reference Colour' =
+			
+			IF(
+			    [IGP # Distribution vs.PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 05 IGP
+		lineageTag: 69acacad-ee61-4c85-a076-f6d2b70bedc7
+
+	measure 'IGP # Distribution Target Achievement' = [IGP # Distribution] - [IGP # Distribution Target]
+		displayFolder: 05 IGP
+		lineageTag: 7b5f26e9-41eb-472d-a72d-1128166a7233
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'IGP # Distribution Target % Achievement' =
+			
+			DIVIDE(
+			    [IGP # Distribution] - [IGP # Distribution Target],
+			    [IGP # Distribution Target],
+			    0
+			)
+		displayFolder: 05 IGP
+		lineageTag: dae867c0-02d2-4708-a455-2aa7ac3aa876
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card IGP | Distribution Target Reference' = ```
+			
+			VAR _Metric_Variance = [IGP # Distribution Target Achievement]
+			VAR _Metric_Growth = [IGP # Distribution Target % Achievement]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 05 IGP
+		lineageTag: ebbb5a9b-56b9-4154-a9ec-475856f2ba82
+
+	measure 'KPI Card IGP | Distribution Target Reference Colour' =
+			
+			IF(
+			    [IGP # Distribution Target % Achievement] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 05 IGP
+		lineageTag: d276f55a-1fd9-41f1-a4bc-cd0bdf078622
+
+	measure 'IGP # Distribution L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [IGP # Distribution],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0
+		displayFolder: 05 IGP
+		lineageTag: ea2ce704-85f0-47b9-9f3e-2f7d6210f2dc
+
+	measure 'IGP # Distribution PY L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [IGP # Distribution PY],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0
+		displayFolder: 05 IGP
+		lineageTag: e6282beb-3422-4352-8939-130d3e35945b
+
+	measure 'IGP # Distribution Target L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _QDGP =
+			CALCULATE(
+			    [IGP # Distribution Target],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_QDGP
+		displayFolder: 05 IGP
+		lineageTag: e6810634-e60c-421d-9ce8-26e8c65ac45e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'IGP # Distribution ∆TG' = [IGP # Distribution] - [IGP # Distribution Target]
+		displayFolder: 05 IGP
+		lineageTag: 00cf0650-056d-4f0b-bc33-91522abd9edc
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'IGP # Distribution ∆PY | Normal Format' = [IGP # Distribution] - [IGP # Distribution PY]
+		formatString: 0
+		displayFolder: 05 IGP
+		lineageTag: 01bd4307-de92-4803-8185-bd92fcee2637
+
+	measure 'IGP # Distribution ∆TG | Normal Format' = [IGP # Distribution] - [IGP # Distribution Target]
+		displayFolder: 05 IGP
+		lineageTag: 2cf66ac6-018a-4891-8f62-9b0858b33583
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'IGP # Distribution ∆PY%' =
+			
+			DIVIDE(
+			    [IGP # Distribution] - [IGP # Distribution PY],
+			    [IGP # Distribution PY],
+			    0
+			)
+		displayFolder: 05 IGP
+		lineageTag: f41efb12-6dd0-43e4-90ab-afefe5100827
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'IGP # Distribution ∆TG%' =
+			
+			DIVIDE(
+			    [IGP # Distribution] - [IGP # Distribution Target],
+			    [IGP # Distribution Target],
+			    0
+			)
+		displayFolder: 05 IGP
+		lineageTag: c2bbf07d-822d-4b9a-b7f3-b8e021fa8c9a
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'VGP # Value ∆PY' = [VGP # Value] - [VGP # Value PY]
+		displayFolder: 08 VGP
+		lineageTag: abc588bf-a4cc-41be-bbe5-19204ca6c354
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'VGP # Value ∆PY | Normal Format' = [VGP # Value] - [VGP # Value PY]
+		displayFolder: 08 VGP
+		lineageTag: 109bc99e-e9f5-4804-9919-bcafecff0a0d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'VGP # Value ∆PY%' =
+			
+			DIVIDE(
+			    [VGP # Value] - [VGP # Value PY],
+			    [VGP # Value PY],
+			    0
+			)
+		displayFolder: 08 VGP
+		lineageTag: d6bf73ed-068d-44c4-9baa-94564528c4e6
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'VGP # Value ∆TG' = [VGP # Value] - [VGP # Value Target]
+		displayFolder: 08 VGP
+		lineageTag: f551944e-ab57-45e9-a4c3-fe6c33d1b2d9
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'VGP # Value ∆TG | Normal Format' = [VGP # Value] - [VGP # Value Target]
+		displayFolder: 08 VGP
+		lineageTag: e3941df3-1791-4778-9d55-3df1448610c4
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'VGP # Value ∆TG%' =
+			
+			DIVIDE(
+			    [VGP # Value] - [VGP # Value Target],
+			    [VGP # Value Target],
+			    0
+			)
+		displayFolder: 08 VGP
+		lineageTag: f63c85cc-9507-467c-8303-8bc9e887706b
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'SOD # Value ∆PY' = [SOD # Value] - [SOD # Value PY]
+		displayFolder: 07 SOD
+		lineageTag: 3151f909-663d-4cb4-a187-760a1ee4ac32
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'SOD # Value ∆PY | Normal Format' = [SOD # Value] - [SOD # Value PY]
+		displayFolder: 07 SOD
+		lineageTag: c77edc5d-9191-47e4-a3c7-4cdaac2ff1b2
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOD # Value ∆TG' = [SOD # Value] - [SOD # Value Target]
+		displayFolder: 07 SOD
+		lineageTag: ca07e770-c92a-4b90-be19-e2c5b6bb03bb
+
+		formatStringDefinition = "+#,0.0;-#,0.0;0"
+
+	measure 'SOD # Value ∆TG | Normal Format' = [SOD # Value] - [SOD # Value Target]
+		displayFolder: 07 SOD
+		lineageTag: 71d95801-5a7b-4b3d-8bbe-2e787db2d21d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'SOD # Value ∆PY%' =
+			
+			DIVIDE(
+			    [SOD # Value] - [SOD # Value PY],
+			    [SOD # Value PY],
+			    0
+			)
+		displayFolder: 07 SOD
+		lineageTag: d92a1aa9-0b1d-44c2-a95a-6d318e4dd366
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'SOD # Value ∆TG%' =
+			
+			DIVIDE(
+			    [SOD # Value] - [SOD # Value Target],
+			    [SOD # Value Target],
+			    0
+			)
+		displayFolder: 07 SOD
+		lineageTag: 29d30c06-6ab8-4095-ae92-101f3b26a167
+
+		formatStringDefinition = "+0.0%;-0.0%;0%"
+
+	measure 'Card # Shipment Period | Value Share' = ```
+			
+			VAR _Num_Month = DISTINCTCOUNT(vn_calendar[yearmonth])
+			VAR _All_Month =
+			    CALCULATE(
+			        DISTINCTCOUNT(vn_calendar[yearmonth]),
+			        ALL(vn_calendar)
+			    )
+			VAR _Text = 
+			SWITCH(
+			    TRUE(),
+			    _Num_Month = _All_Month, "Bil | All",
+			    _Num_Month = 1,  FORMAT(MAX(vn_calendar[date]), "MMM'YY"),
+			    _Num_Month > 1,  FORMAT( MIN(vn_calendar[date]), "MMM'YY" ) & "-" & FORMAT( MAX(vn_calendar[date]), "MMM'YY" )
+			)
+			RETURN
+			_Text 
+			```
+		displayFolder: 99 Other
+		lineageTag: 31a757a6-64f5-46a3-bb8f-ca324eef0522
+
+	measure 'Value Share # Value L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Value Share # Value],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 11 Value Share
+		lineageTag: 960e92d6-5cbb-404b-820f-91ef87e9f84a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Percentage L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Value Share # Percentage],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 11 Value Share
+		lineageTag: 3cfea294-32fa-47c9-8916-188866f78efb
+
+	measure 'Value Share # Value PY' =
+			
+			CALCULATE(
+			    [Value Share # Value],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 11 Value Share
+		lineageTag: 0938e569-17f8-4a55-9960-37544c57788a
+
+	measure 'Value Share # Value vs.PY' = ```
+			
+			DIVIDE( 
+			    [Value Share # Value] - [Value Share # Value PY],
+			    [Value Share # Value PY],
+			    0
+			)
+			```
+		displayFolder: 11 Value Share
+		lineageTag: 87271355-6bc7-4627-8a4d-ff2e655dbe92
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'KPI Card Value Share | Value PY Reference' = ```
+			
+			VAR _Metric_Variance = [Value Share # Value] - [Value Share # Value PY]
+			VAR _Metric_Growth = [Value Share # Value vs.PY]
+			
+			VAR _Format_Variance = "▲ +#,00; ▼ -#,00;0"
+			VAR _Format_Growth = "+0.0%; -0.0%;0%"
+			
+			VAR _Formated_Variance = FORMAT( _Metric_Variance , _Format_Variance)
+			VAR _Formated_Growth = FORMAT( _Metric_Growth , _Format_Growth)
+			
+			VAR _Divider = " | "
+			VAR _Space   = " "
+			
+			VAR _result = 
+			SWITCH(
+			    TRUE(),
+			    _Metric_Variance = 0 , "-",
+			    _Space & _Formated_Variance & _Divider & _Formated_Growth)
+			RETURN 
+			_result
+			```
+		displayFolder: 11 Value Share
+		lineageTag: e24182ec-87ea-4e32-a88d-46932adf28bc
+
+	measure 'KPI Card Value Share | Value PY Reference Colour' =
+			
+			IF(
+			    [Value Share # Value vs.PY] > 0, "Green",
+			    "Red"
+			    )
+		displayFolder: 11 Value Share
+		lineageTag: ac9a02f7-b962-47ca-9ae1-19180b411b0a
+
+	measure 'Value Share # Value FYTD' = ```
+			
+			CALCULATE(
+			    [Value Share # Value],
+			    DATESYTD( vn_calendar[date] , "6-30") 
+			)
+			```
+		displayFolder: 11 Value Share
+		lineageTag: 066eb7ad-ef9c-420a-a0ee-4d68d55e082e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Value FYTD IYA' = ```
+			
+			DIVIDE( [Value Share # Value FYTD], [Value Share # Value FYTD PY]) * 100
+			
+			```
+		displayFolder: 11 Value Share
+		lineageTag: 95ba55fd-724f-4fed-ae9f-4f496a687bce
+
+	measure 'Value Share # Value FYTD PY' =
+			
+			CALCULATE(
+			    [Value Share # Value FYTD],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 11 Value Share
+		lineageTag: ddaa81f1-bbc4-416a-8809-f76b52d7dc0b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Total FYTD' = ```
+			
+			CALCULATE(
+			    [Value Share # Total],
+			    DATESYTD( vn_calendar[date] , "6-30") 
+			)
+			```
+		displayFolder: 11 Value Share
+		lineageTag: cd1b7d87-7ba5-49f1-b4e7-254f756e4790
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Total FYTD PY' =
+			
+			CALCULATE(
+			    [Value Share # Total FYTD],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 11 Value Share
+		lineageTag: 26b7ddd7-7170-4806-9be1-dd8b0e6f4849
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Total FYTD IYA' = ```
+			
+			DIVIDE( [Value Share # Total FYTD], [Value Share # Total FYTD PY]) * 100
+			
+			```
+		displayFolder: 11 Value Share
+		lineageTag: bcdf42a4-db08-47fd-8d39-e476bc4ec0f4
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Percentage FYTD' = ```
+			
+			CALCULATE(
+			    [Value Share # Percentage],
+			    DATESYTD( vn_calendar[date] , "6-30") 
+			)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 11 Value Share
+		lineageTag: 63c7eae3-0697-4daa-ae2d-ccdca3e11b32
+
+	measure 'Value Share # Percentage FYTD PY' =
+			
+			CALCULATE(
+			    [Value Share # Percentage FYTD],
+			    SAMEPERIODLASTYEAR( vn_calendar[date] )
+			)
+		displayFolder: 11 Value Share
+		lineageTag: 94018371-9c12-43b0-aaa2-f64845e11d97
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Percentage FYTD IYA' = ```
+			
+			DIVIDE( [Value Share # Percentage FYTD], [Value Share # Percentage FYTD PY]) * 100
+			
+			```
+		displayFolder: 11 Value Share
+		lineageTag: 9286a2d2-abb6-4816-90b1-c72c54b8390b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Value Share # Percentage FYTD L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Value Share # Percentage FYTD],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 11 Value Share
+		lineageTag: 233e582f-433a-4be2-b572-89f32fa191b9
+
+	measure 'Value Share # Percentage FYTD IYA L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Value Share # Percentage FYTD IYA],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		displayFolder: 11 Value Share
+		lineageTag: a5084a9a-95e2-458d-9e94-725261cbd551
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Table Value Share | Selected Row-breakdown Title Name' =
+			
+			"Value Share structure by "&
+			CONCATENATEX(
+			    VALUES('Row break-down analysis'[Name]),
+			    'Row break-down analysis'[Name],
+			    ", "
+			)
+		displayFolder: 99 Other
+		lineageTag: a903fac5-2d20-4b1a-a4fc-f23e224380b9
+
+	measure 'Sellout # Coverage' = SUM(vn_indirect_coverage[coverage_ind_L1M])
+		formatString: #,0
+		displayFolder: 02 Sellout
+		lineageTag: ec65a9e8-ea41-4de8-9df8-9154bc86998b
+
+	measure 'QDGP # Value ∆TG Achievement' =
+			
+			DIVIDE(
+			    [QDGP # Value],[QDGP # Value Target])
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: 748d1f75-8074-44dc-bbbb-ad2ac50ba037
+
+	measure 'Sellout # Coverage L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Sellout # Coverage],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: #,0
+		displayFolder: 02 Sellout
+		lineageTag: b7074d18-e905-4ab7-a491-32017c469746
+
+	measure 'QDGP # Value ∆TG Achievement L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [QDGP # Value ∆TG Achievement],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: be3619f9-6923-4953-82c2-a5bf2b245e90
+
+	measure 'Sellout # Value RTDC Target' = SUM(vn_business_target_distributor_storeswise[Sales Target]) / 10^9
+		formatString: #,0.00
+		displayFolder: 02 Sellout
+		lineageTag: 7eaab876-894e-4b8a-abbf-1296cb1380ab
+
+	measure 'Sellout # Value RTDC Target Achievement' = DIVIDE([Sellout # Value RTDC], [Sellout # Value RTDC Target],0)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: 20587181-13de-4fbc-a51b-f6acdb12df72
+
+	measure 'DGP # Value IYA' =
+			
+			DIVIDE([DGP # Value], [DGP # Value PY])
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 03 DGP
+		lineageTag: 661d6b08-1053-42a1-9e2c-b59acfebd677
+
+	measure 'Sellout # Value LP Target' = SUM(vn_busines_target_LP[Cut off All]) / 10^9
+		formatString: #,0.00
+		displayFolder: 02 Sellout
+		lineageTag: 0b802463-54b3-419b-9b72-97a422bbac08
+
+	measure 'Sellout # Value LP Target Achievement' = DIVIDE([Sellout # Value RTDC] , [Sellout # Value LP Target],0)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: a38fc440-bbd4-4df9-9fe9-b462c836f5dc
+
+	measure 'DGP # Value LP Target' = SUM(vn_business_target_distributor_storeswise[DGP P3M Target])
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: 932fcc02-ee2f-4437-8762-e9de382782a0
+
+	measure 'DGP # Value LP Target Achievement' = DIVIDE([DGP # Value], [DGP # Value LP Target],0)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 03 DGP
+		lineageTag: 635b100f-9dd0-41bc-af63-f8a2d6c21460
+
+	measure 'LP # Golden Store' = ```
+			
+			CALCULATE(
+			    DISTINCTCOUNT(dim_indirect_store[pr_key]),
+			    FILTER(
+			        dim_indirect_store,
+			        [Sellout # Value LP Target Achievement] - [Time Elapsed]>=0 && 
+			        [DGP # Value LP Target Achievement] - [Time Elapsed]>=0 && 
+			        [LP # Visibility]>=1
+			    )
+			)
+			```
+		formatString: #,0
+		displayFolder: 09 GoldenStore
+		lineageTag: f83b07d1-7a0a-4546-8d3e-b6b42eef9bc2
+
+	measure 'Time Elapsed' =
+			
+			VAR SelectedDate = MAX( vn_calendar[date] )
+			VAR TodayDate = TODAY( )
+			
+			-- Check if selected month is before current month
+			VAR IsPastMonth =
+			    YEAR( SelectedDate ) < YEAR( TodayDate )
+			        || ( YEAR( SelectedDate ) = YEAR( TodayDate )
+			        && MONTH( SelectedDate ) < MONTH( TodayDate ) )
+			
+			-- Use TODAY() if current month is selected; else use selected date
+			VAR EffectiveMaxDate =
+			    IF( IsPastMonth, SelectedDate, TodayDate )
+			
+			-- Start of selected month
+			VAR _StartOfMonth =
+			    DATE( YEAR( SelectedDate ), MONTH( SelectedDate ), 1 )
+			
+			-- Max day = number of working days from start of month to effective max date
+			VAR Max_day =
+			    CALCULATE(
+			        COUNTROWS( vn_calendar ),
+			        vn_calendar[date] <= EffectiveMaxDate,
+			        vn_calendar[date] >= _StartOfMonth
+			    )
+			
+			-- Total calendar days in selected month
+			VAR Total_working_days = DAY( EOMONTH( SelectedDate, 0 ) )
+			
+			-- Remove custom non-working days from numerator
+			VAR numerator =
+			    Max_day
+			        - CALCULATE(
+			            COUNT( vn_workday[workday] ),
+			            FILTER(
+			                vn_workday,
+			                vn_workday[count of working days] = 0
+			                    && vn_workday[date] <= EffectiveMaxDate
+			            )
+			        )
+			
+			-- Remove Sundays + custom days from denominator
+			VAR denominator =
+			    Total_working_days
+			        - ( [SundayCountInCurrentMonth]
+			        + CALCULATE(
+			            COUNT( vn_workday[workday] ),
+			            FILTER(
+			                vn_workday,
+			                vn_workday[Denominator] = 0
+			                    && vn_workday[date] <= SelectedDate
+			            )
+			        ) )
+			RETURN
+			    IF(
+			        IsPastMonth,
+			        1,  -- return 100%
+			        DIVIDE( numerator - 1, denominator, 0 )
+			    )
+		displayFolder: 09 GoldenStore
+		lineageTag: 915ab21d-dfa7-4d0f-af37-b35321ce63d4
+
+	measure SundayCountInCurrentMonth =
+			
+			VAR TodayDate = max(vn_calendar[date])
+			VAR StartOfMonthdate = DATE(YEAR(TodayDate), MONTH(TodayDate), 1)
+			VAR EndOfMonthdate = EOMONTH(TodayDate, 0)
+			VAR DaysInMonth = DATEDIFF(StartOfMonthdate, EndOfMonthdate, DAY) + 1
+			VAR AllDates =
+			    ADDCOLUMNS(
+			        GENERATESERIES(0, DaysInMonth - 1, 1),
+			        "DateValue", StartOfMonthdate + [Value]
+			    )
+			RETURN
+			COUNTROWS(
+			    FILTER(
+			        AllDates,
+			        WEEKDAY([DateValue], 2) = 7  -- Sunday (week starts on Monday)
+			    )
+			)
+		formatString: 0
+		displayFolder: 09 GoldenStore
+		lineageTag: 6c35a6e0-7417-4b12-bc4b-5cddc1f967f4
+
+	measure 'LP # Visibility' =
+			
+			CALCULATE (
+			    AVERAGE ( vn_hpt_displaycheck_visitmonth[percentage_of_compliance] ),
+			    CONTAINSSTRING ( vn_hpt_displaycheck_visitmonth[display_program], "SILVER" )
+			    || CONTAINSSTRING ( vn_hpt_displaycheck_visitmonth[display_program], "GOLD" )
+			    || CONTAINSSTRING ( vn_hpt_displaycheck_visitmonth[display_program], "PLATINUM" )
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 09 GoldenStore
+		lineageTag: 6b37d967-d7d4-4a27-8208-85ce56e68fa6
+
+	measure 'LP # Enrolled Store' = DISTINCTCOUNT(vn_busines_target_LP[pr_key])
+		formatString: #,0
+		displayFolder: 09 GoldenStore
+		lineageTag: ed8e83f4-71d0-48c8-970f-1b7dbe985481
+
+	measure 'LP # Golden vs.Enrolled' = DIVIDE([LP # Golden Store] , [LP # Enrolled Store], 0 )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 09 GoldenStore
+		lineageTag: 53829c00-5821-4975-b4d7-033a73d6f5b8
+
+	measure 'Sellout # Value RTDC Target Achievement L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Sellout # Value RTDC Target Achievement],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: c55585a8-07cb-4dd1-9446-0760a7a3c798
+
+	measure 'DGP # Value IYA L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [DGP # Value IYA],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 03 DGP
+		lineageTag: e4fbc76b-8fec-4748-aeaf-13f7bd776281
+
+	measure 'LP # Golden vs. Enrolled L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [LP # Golden vs.Enrolled],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 09 GoldenStore
+		lineageTag: 934d8843-cf4f-4d71-8ab8-9ee7a156a073
+
+	measure 'LP # Golden Store L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [LP # Golden Store],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0
+		displayFolder: 09 GoldenStore
+		lineageTag: 224515e5-d610-4d4f-a1a8-4e332cd1b274
+
+	measure 'QDGP # Value Target Index Achievement L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _QDGP =
+			CALCULATE(
+			    [QDGP # Value Target Index Achievement],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_QDGP
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: d18f7d26-cd76-484d-9174-740bada9b4ec
+
+	measure 'Sellout # Value RTDC WS JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			RETURN
+			_JAS_Value
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 7eeb24ab-ebc1-490f-8f99-d326ba89609c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC WS OND' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"10","11","12"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"10","11","12"}
+			    )
+			)
+			RETURN
+			_OND_Value
+			```
+		displayFolder: 02 Sellout
+		lineageTag: ce3e5e5e-5abd-4221-8497-d07cb9dd485c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC JAS Target' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC Target],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			RETURN
+			_JAS_Value
+			```
+		displayFolder: 02 Sellout
+		lineageTag: c361cea1-f797-4995-a5ee-87cd74feb9f4
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC WS' =
+			
+			CALCULATE(
+			    [Sellout # Value RTDC],
+			    dim_indirect_store[sub_channel] = "WSP"
+			)
+		displayFolder: 02 Sellout
+		lineageTag: 1be4e9d4-cd90-4d6a-b403-ab5398ca617c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC Target WS' =
+			
+			CALCULATE(
+			    [Sellout # Value RTDC Target],
+			    dim_indirect_store[sub_channel] = "WSP"
+			)
+		displayFolder: 02 Sellout
+		lineageTag: 254c98e0-97a4-4546-b200-9fbbfc80c8df
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC Target Achievement WS' =
+			
+			CALCULATE(
+			    [Sellout # Value RTDC Target Achievement],
+			    dim_indirect_store[sub_channel] = "WSP"
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: b6ccebc2-1224-4779-89e9-29c7794e4805
+
+	measure 'Sellout # Value RTDC Target Achievement L12M WS' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE(
+			    [Sellout # Value RTDC Target Achievement WS],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: 41d1f29e-0ea1-43eb-a103-71d27f0f6c44
+
+	measure 'Sellout # Value RTDC L12M WS' = ```
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _Shipment =
+			CALCULATE( 
+			    [Sellout # Value RTDC WS],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_Shipment
+			```
+		displayFolder: 02 Sellout
+		lineageTag: a3200074-2517-4719-b397-8ae2ad8e73be
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'DO # Table title WS' = ```
+			
+			VAR _selected = SELECTEDVALUE('DO Scenario Metric Selection'[MetricName Key])
+			VAR _change = 
+			SWITCH(
+			    TRUE(),
+			    _selected = "RTDC", "WS Sellout",
+			    "WS "&_selected
+			)
+			RETURN
+			_change & " Detail"
+			```
+		displayFolder: 99 Other
+		lineageTag: 91c2e59d-4408-4587-8333-052ec54bf18f
+
+	measure 'Sellout # Value RTDC JAS Target Achievement' = DIVIDE([Sellout # Value RTDC WS JAS], [Sellout # Value RTDC JAS Target],0)
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: 7bad9331-e6c4-436b-b22b-7ae4cbfe5b95
+
+	measure 'Sellout # Value RTDC WS JFM' = ```
+			
+			VAR _JFM_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"01","02","03"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"01","02","03"}
+			    )
+			)
+			RETURN
+			_JFM_Value
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 550a3ffe-e3bd-4b97-a67c-10e7f648ab89
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC WS AMJ' = ```
+			
+			VAR _AJM_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"04","05","06"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"04","05","06"}
+			    )
+			)
+			RETURN
+			_AJM_Value
+			```
+		displayFolder: 02 Sellout
+		lineageTag: b00ff3b4-f8b7-47ce-a314-636c0ba8e41f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC WS AMJ Target' = ```
+			
+			VAR _AJM_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC Target WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"04","05","06"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"04","05","06"}
+			    )
+			)
+			RETURN
+			_AJM_Value
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 094b11ae-43ea-4964-b9b2-53ead4174d2a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC WS JAS Target' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC Target WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			RETURN
+			_JAS_Value
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 62056be9-bbd9-4ad7-ae6a-e728fbf78cda
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC WS JFM Target' = ```
+			
+			VAR _JFM_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC Target WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"01","02","03"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"01","02","03"}
+			    )
+			)
+			RETURN
+			_JFM_Value
+			```
+		displayFolder: 02 Sellout
+		lineageTag: 035ced64-074a-4f3a-b0a4-684bb4adc889
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC WS OND Target' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC Target WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"10","11","12"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"10","11","12"}
+			    )
+			)
+			RETURN
+			_OND_Value
+			```
+		displayFolder: 02 Sellout
+		lineageTag: c8caea03-67bc-4c9f-8478-85fed81d170a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Sellout # Value RTDC WS AMJ Target Achievement' = ```
+			
+			VAR _AJM_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC Target Achievement WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"04","05","06"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"04","05","06"}
+			    )
+			)
+			RETURN
+			_AJM_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: 96ce2491-23e7-46c7-b18a-03f0695fa678
+
+	measure 'Sellout # Value RTDC WS JAS Target Achievement' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC Target Achievement WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			RETURN
+			_JAS_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: eed80634-e8ca-40dd-a75d-524023d8955c
+
+	measure 'Sellout # Value RTDC WS OND Target Achievement' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC Target Achievement WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"10","11","12"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"10","11","12"}
+			    )
+			)
+			RETURN
+			_OND_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: 6a0f4132-7a13-47b7-a2bd-b89cfb21e126
+
+	measure 'Sellout # Value RTDC WS JFM Target Achievement' = ```
+			
+			VAR _JFM_Value = 
+			CALCULATE(
+			    [Sellout # Value RTDC Target Achievement WS],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"01","02","03"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"01","02","03"}
+			    )
+			)
+			RETURN
+			_JFM_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 02 Sellout
+		lineageTag: c3b48058-c9fe-4f56-9db1-a4a717796156
+
+	measure 'QDGP # Value Target Index Achievement AMJ' = ```
+			
+			VAR _AJM_Value = 
+			CALCULATE(
+			    [QDGP # Value Target Index Achievement],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"04","05","06"}
+			    ))
+			RETURN
+			_AJM_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: 2b2ea85c-5dd3-4440-bb53-778d3044e3d0
+
+	measure 'QDGP # Value .JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [QDGP # Value],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			RETURN
+			_JAS_Value
+			```
+		formatString: #,0
+		displayFolder: 04 QDGP
+		lineageTag: 7d6fc629-cf7c-4aee-8ba9-bd38d1ac92f1
+
+	measure 'QDGP # Value Target Index Achievement JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [QDGP # Value Target Index Achievement],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			RETURN
+			_JAS_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: 474faf3c-9f41-4fe5-9c05-7cd620520c23
+
+	measure 'QDGP # Value Target Index Achievement OND' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [QDGP # Value Target Index Achievement],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"10","11","12"}
+			    ))
+			RETURN
+			_OND_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: 944095eb-f5d6-4b0f-aa4b-05d35e5913fd
+
+	measure 'QDGP # Value Target Index Achievement JFM' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [QDGP # Value Target Index Achievement],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"01","02","03"}
+			    ))
+			RETURN
+			_OND_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 QDGP
+		lineageTag: 2122a0a9-e29e-4ae6-a076-e390bb05e8ed
+
+	measure 'Sellout # Coverage JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [Sellout # Coverage],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			RETURN
+			_JAS_Value
+			```
+		formatString: #,0
+		displayFolder: 02 Sellout
+		lineageTag: 8243be32-e001-4066-aa3c-a302e8e67d20
+
+	measure 'Sellout # Coverage OND' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [Sellout # Coverage],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"10","11","12"}
+			    ))
+			RETURN
+			_OND_Value
+			```
+		formatString: #,0
+		displayFolder: 02 Sellout
+		lineageTag: a7db7299-f319-4648-a387-709005658e12
+
+	measure 'Sellout # Coverage JFM' = ```
+			
+			VAR _JFM_Value = 
+			CALCULATE(
+			    [Sellout # Coverage],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"01","02","03"}
+			    ))
+			RETURN
+			_JFM_Value
+			```
+		formatString: #,0
+		displayFolder: 02 Sellout
+		lineageTag: ff4c9ac3-d50a-4b9b-945f-ef7f6ff9f98d
+
+	measure 'Sellout # Coverage AMJ' = ```
+			
+			VAR _AMJ_Value = 
+			CALCULATE(
+			    [Sellout # Coverage],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"04","05","06"}
+			    ))
+			RETURN
+			_AMJ_Value
+			```
+		formatString: #,0
+		displayFolder: 02 Sellout
+		lineageTag: 4f175ff5-9d2f-413b-9d2a-4dc7fdbf6676
+
+	measure 'DO # Column Chart title HFS' = ```
+			
+			VAR _selected = SELECTEDVALUE('DO Scenario Metric Selection'[MetricName Key])
+			VAR _change = 
+			SWITCH(
+			    TRUE(),
+			    _selected = "RTDC", "WS Sellout",
+			    _selected
+			)
+			RETURN
+			"HFS " &_change & " Trend | Last 12 Months"
+			```
+		displayFolder: 99 Other
+		lineageTag: ba44399c-5cb9-46cb-a35b-e3d0f4aaa002
+
+	measure 'DO # Column Chart title WS' = ```
+			
+			VAR _selected = SELECTEDVALUE('DO Scenario Metric Selection'[MetricName Key])
+			VAR _change = 
+			SWITCH(
+			    TRUE(),
+			    _selected = "RTDC", "WS Sellout",
+			    "WS "&_selected
+			)
+			RETURN
+			_change & " Trend | Last 12 Months"
+			```
+		displayFolder: 99 Other
+		lineageTag: f692a66b-b429-4a57-9718-1dd59b75b6fc
+
+	measure 'DO # Table title HFS' = ```
+			
+			VAR _selected = SELECTEDVALUE('DO Scenario Metric Selection'[MetricName Key])
+			VAR _change = 
+			SWITCH(
+			    TRUE(),
+			    _selected = "RTDC", "WS Sellout",
+			    _selected
+			)
+			RETURN
+			"HFS " & _change & " Detail"
+			```
+		displayFolder: 99 Other
+		lineageTag: 8f0a6c6c-ca86-44ce-a869-f1548e3f7ee4
+
+	measure 'DGP # Value JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [DGP # Value],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			RETURN
+			DIVIDE( _JAS_Value , _JAS_Month_Num * 3)
+			```
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: 276c4578-7c8f-4288-be5e-2f1d3d12941e
+
+	measure 'DGP # Value OND' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [DGP # Value],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"10","11","12"}
+			    ))
+			VAR _OND_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"10","11","12"}
+			    )
+			)
+			RETURN
+			DIVIDE( _OND_Value , _OND_Month_Num * 3)
+			```
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: 01681d96-159f-4edd-9012-ba4816372317
+
+	measure 'DGP # Value JFM' = ```
+			
+			VAR _JFM_Value = 
+			CALCULATE(
+			    [DGP # Value],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"01","02","03"}
+			    ))
+			VAR _JFM_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"01","02","03"}
+			    )
+			)
+			RETURN
+			DIVIDE( _JFM_Value , _JFM_Month_Num * 3)
+			```
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: 7ec2a75a-505a-436a-a6a7-9bb8343bf098
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'DGP # Value AMJ' = ```
+			
+			VAR _AMJ_Value = 
+			CALCULATE(
+			    [DGP # Value],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"04","05","06"}
+			    ))
+			VAR _AMJ_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"04","05","06"}
+			    )
+			)
+			RETURN
+			DIVIDE( _AMJ_Value , _AMJ_Month_Num * 3)
+			```
+		formatString: #,0
+		displayFolder: 03 DGP
+		lineageTag: b6d7f2c9-e921-4e19-b722-181e1ced320a
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'DGP # Value IYA JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [DGP # Value PY],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			VAR _JAS_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"07","08","09"}
+			    )
+			)
+			VAR _PY =
+			DIVIDE( _JAS_Value , _JAS_Month_Num * 3)
+			RETURN
+			DIVIDE([DGP # Value JAS], _PY)
+			```
+		formatString: #,0.00%;-#,0.00%;#,0.00%
+		displayFolder: 03 DGP
+		lineageTag: b319f5c1-9e2d-430a-a5f5-4a78b75edef0
+
+	measure 'DGP # Value IYA OND' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [DGP # Value PY],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"10","11","12"}
+			    ))
+			VAR _OND_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"10","11","12"}
+			    )
+			)
+			VAR _PY =
+			DIVIDE( _OND_Value , _OND_Month_Num * 3)
+			RETURN
+			DIVIDE([DGP # Value OND], _PY)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 03 DGP
+		lineageTag: 08ad5ee4-7200-4bf4-a3d9-41c2ae055de0
+
+	measure 'DGP # Value IYA JFM' = ```
+			
+			VAR _JFM_Value = 
+			CALCULATE(
+			    [DGP # Value PY],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"01","02","03"}
+			    ))
+			VAR _JFM_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"01","02","03"}
+			    )
+			)
+			VAR _PY =
+			DIVIDE( _JFM_Value , _JFM_Month_Num * 3)
+			RETURN
+			DIVIDE([DGP # Value JFM], _PY)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 03 DGP
+		lineageTag: 23474bf3-9f7d-4bd6-a710-ed65183cefb4
+
+	measure 'DGP # Value IYA AMJ' = ```
+			
+			VAR _AMJ_Value = 
+			CALCULATE(
+			    [DGP # Value PY],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"04","05","06"}
+			    ))
+			VAR _AMJ_Month_Num =
+			CALCULATE(
+			    DISTINCTCOUNT(vn_calendar[year_fiscal]),
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal]) &&
+			        vn_calendar[month] IN {"04","05","06"}
+			    )
+			)
+			VAR _PY =
+			DIVIDE( _AMJ_Value , _AMJ_Month_Num * 3)
+			RETURN
+			DIVIDE([DGP # Value AMJ], _PY)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 03 DGP
+		lineageTag: d728b1e4-f37c-40b2-b4c6-11455624f3d8
+
+	measure 'test 1' = SUM( vn_pos_monthly[sales_value] )
+		displayFolder: 99 Other
+		lineageTag: 30d7c5b5-d56c-4ee1-8525-4fb15928706b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'LP # Golden vs.Enrolled JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [LP # Golden vs.Enrolled],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			RETURN
+			_JAS_Value
+			```
+		displayFolder: 09 GoldenStore
+		lineageTag: bc4a13c6-66d4-4e8f-8e12-8f3a069df587
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'LP # Golden vs.Enrolled OND' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [LP # Golden vs.Enrolled],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"10","11","12"}
+			    ))
+			RETURN
+			_OND_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 09 GoldenStore
+		lineageTag: 1e772cb6-0061-4cf6-92d0-6332c672bf26
+
+	measure 'LP # Golden vs.Enrolled JFM' = ```
+			
+			VAR _JFM_Value = 
+			CALCULATE(
+			    [LP # Golden vs.Enrolled],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"01","02","03"}
+			    ))
+			RETURN
+			_JFM_Value
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 09 GoldenStore
+		lineageTag: 1e0ac8e2-9aa3-4580-bb10-f95c92b19602
+
+	measure 'LP # Golden vs.Enrolled AMJ' = ```
+			
+			VAR _AMJ_Value = 
+			CALCULATE(
+			    [LP # Golden vs.Enrolled],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"04","05","06"}
+			    ))
+			RETURN
+			_AMJ_Value
+			```
+		displayFolder: 09 GoldenStore
+		lineageTag: 96239219-d40f-44c6-905e-ff7e07bd5284
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Bill # No.Bill' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT(vn_indirect_shipment_fct[bill_id]),
+			    vn_indirect_shipment_fct[indirect_giv_shipment] > 0
+			)
+		formatString: #,0
+		displayFolder: 10 Bill
+		lineageTag: b2b998c8-36c3-46e6-b9b7-362d08a57e15
+
+	measure 'Bill # Avg. No. Bill/Day' = ```
+			
+			VAR WorkingDays = 
+			COUNTROWS(
+			    FILTER(
+			        vn_calendar,
+			        WEEKDAY(vn_calendar[Date], 2) <= 6
+			    )
+			)
+			VAR Seller = DISTINCTCOUNT( dim_indirect_store[seller_id_key])
+			VAR Result = 
+			DIVIDE(
+			    [Bill # No.Bill],
+			    WorkingDays * Seller
+			)
+			RETURN
+			Result
+			```
+		formatString: 0
+		displayFolder: 10 Bill
+		lineageTag: f14bfff9-b4f2-499e-9b2d-e293237d2494
+
+	measure 'Bill # ANBD JAS' = ```
+			
+			VAR _JAS_Value = 
+			CALCULATE(
+			    [Bill # Avg. No. Bill/Day],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"07","08","09"}
+			    ))
+			RETURN
+			_JAS_Value
+			```
+		displayFolder: 10 Bill
+		lineageTag: f37ed8f1-08b8-4520-b84a-68bf8d6aa682
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Bill # ANBD OND' = ```
+			
+			VAR _OND_Value = 
+			CALCULATE(
+			    [Bill # Avg. No. Bill/Day],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"10","11","12"}
+			    ))
+			RETURN
+			_OND_Value
+			```
+		displayFolder: 10 Bill
+		lineageTag: 022d5c5c-803a-4879-8f36-4848db17a32c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Bill # ANBD JFM' = ```
+			
+			VAR _JFM_Value = 
+			CALCULATE(
+			    [Bill # Avg. No. Bill/Day],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"01","02","03"}
+			    ))
+			RETURN
+			_JFM_Value
+			```
+		displayFolder: 10 Bill
+		lineageTag: 4edbe88f-1ef7-4079-802b-8ea1b75cce9a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Bill # ANBD AMJ' = ```
+			
+			VAR _AMJ_Value = 
+			CALCULATE(
+			    [Bill # Avg. No. Bill/Day],
+			    FILTER(
+			        ALL(vn_calendar),
+			        vn_calendar[year_fiscal] IN VALUES(vn_calendar[year_fiscal])  && 
+			        vn_calendar[month] IN {"04","05","06"}
+			    ))
+			RETURN
+			_AMJ_Value
+			```
+		displayFolder: 10 Bill
+		lineageTag: 9d16f848-47f2-48c6-8ed1-506e2377d7e0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Bill # No.Bill L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _No_Bill =
+			CALCULATE(
+			    [Bill # No.Bill],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_No_Bill
+		formatString: 0
+		displayFolder: 10 Bill
+		lineageTag: 2e1c999e-e919-4251-90bb-713983266207
+
+	measure 'Bill # Avg.Bill L12M' =
+			
+			VAR _MaxDate = MAX(vn_calendar[date])
+			VAR _L12M = EDATE(_MaxDate,-12)
+			VAR _No_Bill =
+			CALCULATE(
+			    [Bill # Avg. No. Bill/Day],
+			    REMOVEFILTERS( vn_calendar),
+			    vn_calendar[date] >= _L12M &&
+			    vn_calendar[date] <= _MaxDate,
+			    USERELATIONSHIP( vn_calendar[date], vn_calendar_filter[date])
+			)
+			RETURN
+			_No_Bill
+		displayFolder: 10 Bill
+		lineageTag: c382d152-e175-465c-8f8c-3ef28564033b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Column
+		isHidden
+		formatString: 0
+		lineageTag: a4613365-b517-4bed-a2b3-9b78ff03de6b
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Column]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition '00 Measure' = calculated
+		mode: import
+		source = Row("Column", BLANK())
+
+	annotation PBI_Id = 30c9fb2f7afd4a4aa6dbb304ad7f35f8
+

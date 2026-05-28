@@ -1,0 +1,181 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "f7a63dbafe5e7975f5ed",
+  "position": {
+    "x": 477.10843373493975,
+    "y": 259.42771084337352,
+    "z": 23000,
+    "height": 878.17771084337346,
+    "width": 1343.3584337349398,
+    "tabOrder": 23000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_channel"
+                    }
+                  },
+                  "Property": "channel"
+                }
+              },
+              "queryRef": "dim_channel.channel",
+              "nativeQueryRef": "channel"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_indirect_store"
+                    }
+                  },
+                  "Property": "sub_channel"
+                }
+              },
+              "queryRef": "dim_indirect_store.sub_channel",
+              "nativeQueryRef": "sub_channel"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_indirect_store"
+                    }
+                  },
+                  "Property": "pr_key"
+                }
+              },
+              "queryRef": "dim_indirect_store.pr_key",
+              "nativeQueryRef": "pr_key"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "00 Measure"
+                    }
+                  },
+                  "Property": "Sellout # Value RTDC"
+                }
+              },
+              "queryRef": "00 Measure.Sellout # Value RTDC",
+              "nativeQueryRef": "Sellout # Value RTDC"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "00 Measure"
+                    }
+                  },
+                  "Property": "Sellout # Value LP Target"
+                }
+              },
+              "queryRef": "00 Measure.Sellout # Value LP Target",
+              "nativeQueryRef": "Sellout # Value LP Target"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "00 Measure"
+                    }
+                  },
+                  "Property": "Sellout # Value LP Target Achievement"
+                }
+              },
+              "queryRef": "00 Measure.Sellout # Value LP Target Achievement",
+              "nativeQueryRef": "Sellout # Value LP Target Achievement"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "00 Measure"
+                    }
+                  },
+                  "Property": "LP # Visibility"
+                }
+              },
+              "queryRef": "00 Measure.LP # Visibility",
+              "nativeQueryRef": "LP # Visibility"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "00 Measure"
+                    }
+                  },
+                  "Property": "LP # Enrolled Store"
+                }
+              },
+              "queryRef": "00 Measure.LP # Enrolled Store",
+              "nativeQueryRef": "LP # Enrolled Store"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "00 Measure"
+                    }
+                  },
+                  "Property": "LP # Golden Store"
+                }
+              },
+              "queryRef": "00 Measure.LP # Golden Store",
+              "nativeQueryRef": "LP # Golden Store"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "00 Measure"
+                    }
+                  },
+                  "Property": "LP # Golden vs.Enrolled"
+                }
+              },
+              "queryRef": "00 Measure.LP # Golden vs.Enrolled",
+              "nativeQueryRef": "LP # Golden vs.Enrolled"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "00 Measure"
+                  }
+                },
+                "Property": "Sellout # Value LP Target"
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,141 @@
+table fct_igp
+	lineageTag: fa9c6ac1-9aa2-4596-8319-a16890a360d4
+
+	column '36 Customer.Corp Distributor Branch ID'
+		dataType: string
+		lineageTag: d0a7bfe9-3584-42f5-8494-2058541cc249
+		summarizeBy: none
+		sourceColumn: 36 Customer.Corp Distributor Branch ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column '20 Time.Month (Real)'
+		dataType: string
+		lineageTag: f88d93eb-8bd0-4a28-9a99-8cca4bd21cc9
+		summarizeBy: none
+		sourceColumn: 20 Time.Month (Real)
+
+		annotation SummarizationSetBy = Automatic
+
+	column '61 Store.Route Identifier'
+		dataType: string
+		lineageTag: d504d06d-408b-4358-b6fd-eb69d0523f5a
+		summarizeBy: none
+		sourceColumn: 61 Store.Route Identifier
+
+		annotation SummarizationSetBy = Automatic
+
+	column '61 Store.Source Store ID'
+		dataType: string
+		lineageTag: 0b522cab-3ed0-4bf2-90c4-96bec47aed4c
+		summarizeBy: none
+		sourceColumn: 61 Store.Source Store ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Indirect NIV Shipments'
+		dataType: double
+		lineageTag: 1c6650f8-88a2-4aa8-b12c-efae73de1750
+		summarizeBy: sum
+		sourceColumn: Indirect NIV Shipments
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column IGPGroup_Offtake
+		dataType: int64
+		formatString: 0
+		lineageTag: c36c73c4-fee6-4510-9f4e-49e4d2d7c0f1
+		summarizeBy: sum
+		sourceColumn: IGPGroup_Offtake
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Product Group'
+		dataType: string
+		lineageTag: 34a8cf90-2734-474b-95b2-834fbce3f925
+		summarizeBy: none
+		sourceColumn: Product Group
+
+		annotation SummarizationSetBy = Automatic
+
+	column greenline_key = fct_igp[36 Customer.Corp Distributor Branch ID] & fct_igp[61 Store.Route Identifier] & fct_igp[61 Store.Source Store ID]
+		lineageTag: 88046310-5139-4311-bf15-062b6d9f81b7
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column date = DATE(LEFT(fct_igp[20 Time.Month (Real)],4), RIGHT(fct_igp[20 Time.Month (Real)],2),1)
+		formatString: Short Date
+		lineageTag: 7b452d72-c443-4048-a128-89a8e45ebac3
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column new_product_group =
+			
+			
+			SWITCH(
+			    TRUE(),
+			    LEFT(fct_igp[Product Group], 3) = "GL1", "Greenline 1",
+			    LEFT(fct_igp[Product Group], 3) = "GL2", "Greenline 2",
+			    LEFT(fct_igp[Product Group], 3) = "GL3", "Greenline 3",
+			    LEFT(fct_igp[Product Group], 3) = "GL4", "Greenline 4",
+			    LEFT(fct_igp[Product Group], 3) = "GL5", "Greenline 5"
+			)
+		lineageTag: 583add0e-1468-48c0-9a4b-4c6f84724745
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Greenline Target' =
+			
+			VAR _Key = fct_igp[36 Customer.Corp Distributor Branch ID] & fct_igp[61 Store.Route Identifier] & fct_igp[new_product_group] & fct_igp[20 Time.Month (Real)]
+			RETURN
+			LOOKUPVALUE(
+			    vn_indirect_target_distributor_seller[Value],
+			    vn_indirect_target_distributor_seller[greenline_key],
+			    _Key
+			)
+		formatString: 0
+		lineageTag: 9971f944-9be6-49bb-bb1e-de4b59e4e043
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column pr_key =
+			
+			CALCULATE(
+			    FIRSTNONBLANK(dim_indirect_store[pr_key],0),
+			    FILTER(
+			        dim_indirect_store,
+			        dim_indirect_store[branch_id] = fct_igp[36 Customer.Corp Distributor Branch ID] &&
+			        // dim_indirect_store[seller_id] = fct_igp[61 Store.Route Identifier] &&
+			        dim_indirect_store[store_code] = fct_igp[61 Store.Source Store ID]
+			    ))
+		lineageTag: 9dff107c-f6aa-4418-b577-c4838053e4a1
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fct_igp = m
+		mode: import
+		queryGroup: Fact
+		source =
+				let
+				    Source = PowerPlatform.Dataflows(null),
+				    Workspaces = Source{[Id="Workspaces"]}[Data],
+				    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+				    #"5368ae12-7307-476f-bccc-c497e426cbd5" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="5368ae12-7307-476f-bccc-c497e426cbd5"]}[Data],
+				    Query_ = #"5368ae12-7307-476f-bccc-c497e426cbd5"{[entity="Query",version=""]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(Query_,{"36 Customer.Corp Distributor Branch ID", "20 Time.Month (Real)", "61 Store.Route Identifier", "61 Store.Source Store ID", "Indirect NIV Shipments", "IGPGroup_Offtake", "Product Group"})
+				in
+				    #"Removed Other Columns"
+
+	changedProperty = Name
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,110 @@
+table dim_pos_product
+	lineageTag: e5a7ae46-1f53-46f1-b976-7de93c25959d
+
+	column prod_key
+		dataType: string
+		lineageTag: 9fe3c606-f524-48b2-aae0-130a0cdf46f0
+		summarizeBy: none
+		sourceColumn: prod_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column case_gtin
+		dataType: string
+		lineageTag: c0239b37-0eb8-4226-9756-f3b5a775602c
+		summarizeBy: none
+		sourceColumn: case_gtin
+
+		annotation SummarizationSetBy = Automatic
+
+	column cust_prod_name
+		dataType: string
+		lineageTag: 83aead12-3e78-43b5-b0dc-ce0e2c2adc91
+		summarizeBy: none
+		sourceColumn: cust_prod_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column item_gtin
+		dataType: string
+		lineageTag: bfe87efc-15a2-45db-aba7-6db623dfc2fc
+		summarizeBy: none
+		sourceColumn: item_gtin
+
+		annotation SummarizationSetBy = Automatic
+
+	column fpc_id
+		dataType: string
+		lineageTag: 92d67a39-6083-4421-9599-b4ec3dfb177d
+		summarizeBy: none
+		sourceColumn: fpc_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column sector_name
+		dataType: string
+		lineageTag: 6cb9e7c9-a6b1-470e-9ecf-81b7c9e3f04b
+		summarizeBy: none
+		sourceColumn: sector_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column sub_sector_name
+		dataType: string
+		lineageTag: ac36fcbf-1c13-4c62-8999-ae0516a47749
+		summarizeBy: none
+		sourceColumn: sub_sector_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column data_provider_key
+		dataType: string
+		lineageTag: 6f2eca07-3057-49cc-a2d6-9e2551ce66dc
+		summarizeBy: none
+		sourceColumn: data_provider_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column insert_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 9148dfbb-aaa0-4eb9-8647-6eef6a287e18
+		summarizeBy: none
+		sourceColumn: insert_date
+
+		variation Variation
+			isDefault
+			relationship: f7e3dbc6-8652-4007-b274-1bd891e89231
+			defaultHierarchy: LocalDateTable_091d9ac7-a2a7-439e-8d46-a55592906cf3.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column key
+		dataType: string
+		lineageTag: 18b8da4f-38b9-4551-aafb-eed2f00a4618
+		summarizeBy: none
+		sourceColumn: key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_pos_product = m
+		mode: import
+		queryGroup: Dimension
+		source =
+				let
+				    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+				    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+				    nexa_msv_workbench_gold_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench_gold",Kind="Schema"]}[Data],
+				    vn_pos_product_dim_Table = nexa_msv_workbench_gold_Schema{[Name="vn_pos_product_dim",Kind="Table"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(vn_pos_product_dim_Table,{{"prod_key", type text}, {"case_gtin", type text}, {"cust_prod_name", type text}, {"item_gtin", type text}, {"fpc_id", type text}, {"sector_name", type text}, {"sub_sector_name", type text}, {"data_provider_key", type text}, {"insert_date", type date}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"update_date", "ama_last_processed_date"}),
+				    #"Added Custom" = Table.AddColumn(#"Removed Columns", "key", each [prod_key]&[data_provider_key])
+				in
+				    #"Added Custom"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

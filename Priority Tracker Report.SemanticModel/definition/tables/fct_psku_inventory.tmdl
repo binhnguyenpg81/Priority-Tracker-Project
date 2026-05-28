@@ -1,0 +1,75 @@
+table fct_psku_inventory
+	lineageTag: 69821a74-3d41-4705-8659-2a674f877989
+
+	column store_name
+		dataType: string
+		lineageTag: c5eeb9db-4607-4be1-ad5f-86040a4b011a
+		summarizeBy: none
+		sourceColumn: store_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column gtin_item
+		dataType: string
+		lineageTag: c5dd45df-aaf3-407d-97ab-f20f00a0a17b
+		summarizeBy: none
+		sourceColumn: gtin_item
+
+		annotation SummarizationSetBy = Automatic
+
+	column gtin_name
+		dataType: string
+		lineageTag: 2bd60372-2444-45bf-95c1-d78b91eee429
+		summarizeBy: none
+		sourceColumn: gtin_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column inventory_qty
+		dataType: int64
+		formatString: 0
+		lineageTag: 51f2ea15-e6f0-4d79-b354-1310b1c11f41
+		summarizeBy: sum
+		sourceColumn: inventory_qty
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_key
+		dataType: string
+		lineageTag: 74eb7441-3c76-4e77-93ff-2b47e2580309
+		summarizeBy: none
+		sourceColumn: store_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: a5cc618a-ffce-4b0d-9388-ff9f5f6c79cd
+		summarizeBy: none
+		sourceColumn: date
+
+		variation Variation
+			isDefault
+			relationship: 4fc86fb6-8679-4119-bc9a-9a219efb2d2a
+			defaultHierarchy: LocalDateTable_5609f918-5ff8-4f34-b6c7-4c6a3e5aae24.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition fct_psku_inventory = m
+		mode: import
+		queryGroup: Fact
+		source =
+				let
+				    Source = Table.Combine({fct_psku_inventory_BHX, fct_psku_inventory_WIN}),
+				    #"Filtered Rows" = Table.SelectRows(Source, each [date] <> null and [date] <> ""),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Filtered Rows",{{"store_name", type text}, {"gtin_item", type text}, {"gtin_name", type text}, {"store_key", type text}, {"date", type date}, {"inventory_qty", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

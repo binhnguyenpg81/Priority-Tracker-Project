@@ -1,0 +1,58 @@
+table 'DO Scenario Metric Selection L12M Line'
+	lineageTag: fbe2f092-f7ae-4786-ba2f-a40d012230a9
+
+	column 'Do Scenario Metric Selection Line'
+		lineageTag: f83adf32-8fe8-4197-acef-44b5e9f4763b
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Do Scenario Metric Selection Line Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Do Scenario Metric Selection Line Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Do Scenario Metric Selection Line Fields'
+		isHidden
+		lineageTag: 8852e333-1357-4650-890a-3e44a1d71671
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Do Scenario Metric Selection Line Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Do Scenario Metric Selection Line Order'
+		isHidden
+		formatString: 0
+		lineageTag: 537e1b33-c7fa-48b4-ab74-ef957275e048
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'MetricName Key'
+		lineageTag: 35187928-321a-4b11-94c7-b766937a61a7
+		summarizeBy: none
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'DO Scenario Metric Selection L12M Line' = calculated
+		mode: import
+		source =
+				{
+				    ("% Hitting Target",            NAMEOF('00 Measure'[Sellout # Value RTDC Target Achievement L12M WS]),       0,          "RTDC"),
+				    ("DGP IYA",                     NAMEOF('00 Measure'[DGP # Value IYA L12M]),                                  1,          "DGP"),
+				    ("QDGP%",                       NAMEOF('00 Measure'[QDGP # Value ∆TG Achievement L12M]),                     2,          "QDGP"),
+				    ("Golden store",                NAMEOF('00 Measure'[LP # Golden vs. Enrolled L12M]),                         3,          "Golden store"),
+				    ("OT Bill/Day",                 NAMEOF('00 Measure'[Bill # Avg.Bill L12M]),                                  4,          "OT Bill/Day")
+				}
+
+	annotation PBI_Id = 73cc242550bf49b7a60adc2f9323383b
+

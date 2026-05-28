@@ -1,0 +1,108 @@
+table dim_ir_product
+	lineageTag: 6bd5aacd-7f0d-49ac-bd57-65d1c205c1d7
+
+	column base
+		dataType: string
+		lineageTag: 1513d8da-2060-4109-a11d-6b13428d0b41
+		summarizeBy: none
+		sourceColumn: base
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_ean
+		dataType: string
+		lineageTag: b2fd7f09-53b9-4555-b5e1-ca456640f1f2
+		summarizeBy: none
+		sourceColumn: product_ean
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_id
+		dataType: string
+		lineageTag: 012445bd-e70e-46cb-b0f3-b2697684d418
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_brand
+		dataType: string
+		lineageTag: d5bebcee-84a2-409c-9cfa-a09e6e1c5e84
+		summarizeBy: none
+		sourceColumn: category_brand
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category_Shipment
+		dataType: string
+		lineageTag: 4824f0ad-1bec-4342-a500-3eeebf447dab
+		summarizeBy: none
+		sourceColumn: Category_Shipment
+
+		annotation SummarizationSetBy = Automatic
+
+	column Brand_Shipment
+		dataType: string
+		lineageTag: 1a6ce0f6-6876-4482-8a4d-347405560252
+		summarizeBy: none
+		sourceColumn: Brand_Shipment
+
+		annotation SummarizationSetBy = Automatic
+
+	column type
+		dataType: string
+		lineageTag: a22fc081-3a33-4507-b764-23ae163467b3
+		summarizeBy: none
+		sourceColumn: type
+
+		annotation SummarizationSetBy = Automatic
+
+	column brand
+		dataType: string
+		lineageTag: 5e439f62-a1db-4398-853f-352ae6e7b842
+		summarizeBy: none
+		sourceColumn: brand
+
+		annotation SummarizationSetBy = Automatic
+
+	column shipment_category_brand
+		dataType: string
+		lineageTag: 7f5d1c1a-1970-4bb1-9982-942f0a55991f
+		summarizeBy: none
+		sourceColumn: shipment_category_brand
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_ir_product = m
+		mode: import
+		queryGroup: Dimension
+		source = ```
+				let
+				    Source = PowerPlatform.Dataflows(null),
+				    Workspaces = Source{[Id="Workspaces"]}[Data],
+				    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+				    #"eeb7231a-7987-44b3-ba05-113c028de0b2" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="eeb7231a-7987-44b3-ba05-113c028de0b2"]}[Data],
+				    ir_product_master_ = #"eeb7231a-7987-44b3-ba05-113c028de0b2"{[entity="ir_product_master",version=""]}[Data],
+				    #"Capitalized Each Word" = Table.TransformColumns(ir_product_master_,{{"brand", Text.Proper, type text}, {"base", Text.Proper, type text}}),
+				    #"Added Custom" = Table.AddColumn(#"Capitalized Each Word", "category_brand", each [base]&[brand]),
+				    #"Merged Queries" = Table.NestedJoin(#"Added Custom", {"category_brand"}, #"VN_Product Hierarchy Mapping_Datahub_SFDC_IR", {"category_brand"}, "VN_Product Hierarchy Mapping_Datahub_SFDC_IR", JoinKind.LeftOuter),
+				    #"Expanded VN_Product Hierarchy Mapping_Datahub_SFDC_IR" = Table.ExpandTableColumn(#"Merged Queries", "VN_Product Hierarchy Mapping_Datahub_SFDC_IR", {"Category_Shipment", "Brand_Shipment"}, {"Category_Shipment", "Brand_Shipment"}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Expanded VN_Product Hierarchy Mapping_Datahub_SFDC_IR",{"base", "product_ean", "product_id", "brand", "category_brand", "Category_Shipment", "Brand_Shipment"}),
+				    #"Added Custom1" = Table.AddColumn(#"Removed Other Columns", "type",
+				    each 
+				        if List.Contains(
+				            {"DIS", "Dis", "dis"}, 
+				            Text.Start([base], 3)
+				        ) 
+				        then "SOD" 
+				        else "SOS"
+				),
+				    #"Added Custom2" = Table.AddColumn(#"Added Custom1", "shipment_category_brand", each [Category_Shipment]&[Brand_Shipment])
+				in
+				    #"Added Custom2"
+				```
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

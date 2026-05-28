@@ -1,0 +1,73 @@
+table vn_pos_store_dim_vw
+	lineageTag: d81873d0-4606-4843-ac03-ad175b8e5c86
+
+	column site_name
+		dataType: string
+		lineageTag: 7fedaf80-f486-430a-9090-326b2ec6d754
+		summarizeBy: none
+		sourceColumn: site_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column data_provider_key
+		dataType: string
+		lineageTag: 46bc3334-7ba2-49bd-912c-57b641443c12
+		summarizeBy: none
+		sourceColumn: data_provider_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column pos_store_key
+		dataType: string
+		lineageTag: e9d4c895-93b3-4c89-9566-2fd07e553e10
+		summarizeBy: none
+		sourceColumn: pos_store_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column pos_site_id
+		dataType: string
+		lineageTag: 9062eb55-cd18-4eb9-a8e9-9e50346ef5a6
+		summarizeBy: none
+		sourceColumn: pos_site_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column data_provider_name
+		dataType: string
+		lineageTag: ffefb36c-50df-408a-984d-9cbe9b12bb7c
+		summarizeBy: none
+		sourceColumn: data_provider_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column sfdc_store_code
+		dataType: string
+		lineageTag: 24f022cc-d762-4763-adeb-5cf51eb9af16
+		summarizeBy: none
+		sourceColumn: sfdc_store_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column pos_store_code
+		dataType: string
+		lineageTag: d97a1150-70c7-46fb-b656-a06d25640b77
+		summarizeBy: none
+		sourceColumn: pos_store_code
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vn_pos_store_dim_vw = m
+		mode: import
+		queryGroup: Dimension
+		source =
+				let
+				    Source = Value.NativeQuery(Databricks.Catalogs("adb-1405689875182560.0.azuredatabricks.net", "sql/protocolv1/o/1405689875182560/0428-061324-1bphpcbr", [Catalog="cdl_amhq_prod", Database=null, EnableAutomaticProxyDiscovery=null, Implementation=null]){[Name="cdl_amhq_prod",Kind="Database"]}[Data], "select distinct#(lf)    a.store_key as pos_store_key,#(lf)    a.data_provider_key as data_provider_key,#(lf)    b.site_id as pos_site_id,#(lf)    c.data_provider_name as data_provider_name,#(lf)    d.store_id as sfdc_store_code,#(lf)    b.site_name as site_name,#(lf)    case#(lf)        when a.data_provider_key = 10000101724280 #(lf)            then concat('WCM_', substring(REGEXP_REPLACE(b.site_id, '\\s+', ''), 5))#(lf)            #(lf)        when a.data_provider_key = 10000101752637 #(lf)            then concat('BHX_', substring(REGEXP_REPLACE(b.site_id, '\\s+', ''), 5))#(lf)            #(lf)        else substring(REGEXP_REPLACE(b.site_id, '\\s+', ''), 5)#(lf)    end as pos_store_code#(lf)from#(lf)    nexa_msv_workbench_gold.vn_pos_monthly_fact as a#(lf)    left join nexa_msv_workbench.site_dim_vw as b#(lf)        on a.data_provider_key = b.data_provider_key#(lf)        and a.store_key = b.site_key#(lf)    left join nexa_msv_workbench_gold.vn_data_provider_key as c#(lf)        on a.data_provider_key = c.data_provider_key#(lf)    left join nexa_msv_workbench_gold.vn_store_sfdc_dim as d#(lf)        on a.store_key = d.pos_store_code#(lf)where a.sales_value > 0", null, [EnableFolding=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"pos_store_key", type text}, {"data_provider_key", type text}, {"pos_site_id", type text}, {"data_provider_name", type text}, {"sfdc_store_code", type text}, {"site_name", type text}, {"pos_store_code", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

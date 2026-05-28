@@ -1,0 +1,37 @@
+table dim_channel
+	lineageTag: 89a123cc-584c-49aa-81a2-2fc6fc8d2147
+
+	column channel
+		dataType: string
+		lineageTag: 8aaa98de-9637-4a1e-8689-5c276765cfcd
+		summarizeBy: none
+		sourceColumn: channel
+		sortByColumn: sort
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column sort
+		dataType: int64
+		formatString: 0
+		lineageTag: a3f21797-896b-41e2-bba3-0b5d4c2ccbc9
+		summarizeBy: none
+		sourceColumn: sort
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_channel = m
+		mode: import
+		queryGroup: Dimension
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45W8nALVtJRMlSK1YlW8nYMB7KNwOzg3MScnKT8CqCAMVjAI9gXyDYBs12T83OBHFMwJ9U3tTgRyDMD85yKEvNSFAISi0ryUouAouZg0bDM1BIFn8zUPKCIhVJsLAA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [channel = _t, sort = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"channel", type text}, {"sort", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

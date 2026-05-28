@@ -1,0 +1,39 @@
+table dim_category_brand
+	lineageTag: f638e31e-d12b-4fe8-b924-1fe45a08b680
+
+	column base
+		lineageTag: 16a15e55-d28f-4701-a322-ac4556d8ec81
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: dim_ir_product[base]
+
+		annotation SummarizationSetBy = Automatic
+
+	column brand
+		lineageTag: fb2ca982-2f9b-455a-bdcc-514692b7ab36
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: dim_ir_product[brand]
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_brand
+		lineageTag: 9637dffb-d1c6-4f0e-9094-1da8385674d8
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: dim_ir_product[category_brand]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_category_brand = calculated
+		mode: import
+		source =
+				
+				SUMMARIZE(
+				    dim_ir_product,
+				    dim_ir_product[base],
+				    dim_ir_product[brand],
+				    dim_ir_product[category_brand])
+
+	annotation PBI_Id = 6aa8cffa5e7a46f0954dd95ba6e13e22
+

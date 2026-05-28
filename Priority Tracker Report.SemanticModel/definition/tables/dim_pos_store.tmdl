@@ -1,0 +1,88 @@
+table dim_pos_store
+	lineageTag: 6c1f0eed-7bfd-4763-950e-80564cfde455
+
+	column store_id
+		dataType: string
+		lineageTag: 49e47cc3-09c4-464e-8cfc-7bd33eddb731
+		summarizeBy: none
+		sourceColumn: store_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column pr_key
+		dataType: string
+		lineageTag: be653bc3-3b4d-4bce-bc90-7bc6e23cf804
+		summarizeBy: none
+		sourceColumn: pr_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer
+		dataType: string
+		lineageTag: 03f4462e-8de0-4109-ab4a-a07d5c651f1d
+		summarizeBy: none
+		sourceColumn: customer
+
+		annotation SummarizationSetBy = Automatic
+
+	column local_segment
+		dataType: string
+		lineageTag: 9583e61d-01a4-499f-b174-81fa085ce398
+		summarizeBy: none
+		sourceColumn: local_segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column sub_channel
+		dataType: string
+		lineageTag: 8eda713c-bed3-40e9-8604-5ef1454ecdae
+		summarizeBy: none
+		sourceColumn: sub_channel
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_pos_store = m
+		mode: import
+		queryGroup: Dimension
+		source =
+				let
+				    Source = PowerPlatform.Dataflows(null),
+				    Workspaces = Source{[Id="Workspaces"]}[Data],
+				    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+				    #"d548f9ca-4b55-4ade-8416-29502998f4a1" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="d548f9ca-4b55-4ade-8416-29502998f4a1"]}[Data],
+				    dim_mr_store_ = #"d548f9ca-4b55-4ade-8416-29502998f4a1"{[entity="dim_mr_store",version=""]}[Data],
+				    #"Split Column by Delimiter" = Table.SplitColumn(dim_mr_store_, "Source.Name", Splitter.SplitTextByEachDelimiter({"-"}, QuoteStyle.Csv, false), {"Source.Name.1", "Source.Name.2"}),
+				    #"Split Column by Delimiter1" = Table.SplitColumn(#"Split Column by Delimiter", "Source.Name.2", Splitter.SplitTextByEachDelimiter({"."}, QuoteStyle.Csv, false), {"Source.Name.2.1", "Source.Name.2.2"}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Split Column by Delimiter1",{"Source.Name.1", "Source.Name.2.2"}),
+				    #"Trimmed Text" = Table.TransformColumns(#"Removed Columns",{{"Source.Name.2.1", Text.Trim, type text}}),
+				    #"Added Prefix" = Table.TransformColumns(#"Trimmed Text", {{"Source.Name.2.1", each "20" & _, type text}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Added Prefix",{{"Source.Name.2.1", "YearMonth"}}),
+				    #"Split Column by Position" = Table.SplitColumn(#"Renamed Columns", "YearMonth", Splitter.SplitTextByPositions({0, 4}, false), {"YearMonth.1", "YearMonth.2"}),
+				    #"Merged Columns" = Table.CombineColumns(#"Split Column by Position",{"YearMonth.1", "YearMonth.2"},Combiner.CombineTextByDelimiter("M", QuoteStyle.None),"YearMonth"),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Merged Columns",{"YearMonth", "Agency", "SFDC Code", "Sellout Code", "Account Name", "Segmentation"}),
+				    #"Added Conditional Column" = Table.AddColumn(#"Removed Other Columns", "Custom", each if [Agency] = "AEON" then "Aeon" else if [Agency] = "MM MEGA" then "Mega Market" else if [Agency] = "CRV" then "CRV" else if [Agency] = "LOTTE" then "Lotte" else if [Agency] = "SGC" then "Coop" else if [Agency] = "EMART" then "Emart" else if [Agency] = "BHX" then "Bach Hoa Xanh" else if [Agency] = "WCM" then "Winmart" else if [Agency] = "North Balance" then "North balance" else if [Agency] = "South Balance" then "South balance" else [Agency]),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Added Conditional Column",{"Agency"}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns1",{{"Account Name", "store_name"}, {"Custom", "sub_channel"}, {"Segmentation", "local_segment"}, {"YearMonth", "year_month"}, {"SFDC Code", "store_id"}}),
+				    #"Trimmed Text1" = Table.TransformColumns(#"Renamed Columns1",{{"Sellout Code", Text.Trim, type text}}),
+				    #"Uppercased Text" = Table.TransformColumns(#"Trimmed Text1",{{"Sellout Code", Text.Upper, type text}}),
+				    #"Renamed Columns2" = Table.RenameColumns(#"Uppercased Text",{{"Sellout Code", "store_code"}, {"store_name", "customer"}}),
+				    #"Removed Duplicates" = Table.Distinct(#"Renamed Columns2", {"store_code"}),
+				    #"Removed Columns2" = Table.RemoveColumns(#"Removed Duplicates",{"year_month"}),
+				    #"Renamed Columns3" = Table.RenameColumns(#"Removed Columns2",{{"store_code", "pr_key"}}),
+				    #"Duplicated Column" = Table.DuplicateColumn(#"Renamed Columns3", "pr_key", "pr_key - Copy"),
+				    #"Split Column by Delimiter2" = Table.SplitColumn(#"Duplicated Column", "pr_key - Copy", Splitter.SplitTextByDelimiter("_", QuoteStyle.Csv), {"pr_key - Copy.1", "pr_key - Copy.2"}),
+				    #"Added Custom" = Table.AddColumn(#"Split Column by Delimiter2", "Custom", each [store_id]=[pr_key]),
+				    #"Added Custom1" = Table.AddColumn(#"Added Custom", "Custom.1", each [store_id]=[#"pr_key - Copy.2"]),
+				    #"Filtered Rows" = Table.SelectRows(#"Added Custom1", each ([Custom] <> true) and ([Custom.1] = false)),
+				    #"Removed Columns4" = Table.RemoveColumns(#"Filtered Rows",{"pr_key - Copy.2", "Custom", "Custom.1", "pr_key - Copy.1"}),
+				    #"Removed Duplicates1" = Table.Distinct(#"Removed Columns4", {"pr_key"}),
+				    #"Appended Query" = Table.Combine({#"Removed Duplicates1", dim_pos_store_sfdc}),
+				    #"Trimmed Text2" = Table.TransformColumns(#"Appended Query",{{"pr_key", Text.Trim, type text}}),
+				    #"Removed Duplicates2" = Table.Distinct(#"Trimmed Text2", {"pr_key"})
+				in
+				    #"Removed Duplicates2"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,134 @@
+table vn_sfdc_sf_vgp_promo_fct
+	lineageTag: 7ceaef29-877b-415e-95ea-ae8751b6681d
+
+	column kpi_type
+		dataType: string
+		lineageTag: b4f5a261-4214-4e2e-8d80-8400b17375e2
+		summarizeBy: none
+		sourceColumn: kpi_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column visitdate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: e99bedd5-5565-4682-af53-58d98d4e2b81
+		summarizeBy: none
+		sourceColumn: visitdate
+
+		variation Variation
+			isDefault
+			relationship: d82f282f-47cd-45ed-a613-15dacbed4d8f
+			defaultHierarchy: LocalDateTable_d76aa660-e7ea-4ff9-b12b-8a197c2caf0e.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column yearmonth
+		dataType: string
+		lineageTag: d402b3c4-fe0f-456f-b5f5-26c7b54c5c64
+		summarizeBy: none
+		sourceColumn: yearmonth
+
+		annotation SummarizationSetBy = Automatic
+
+	column visit_id
+		dataType: string
+		lineageTag: 1f3ff1dd-a2d8-4f26-a3ee-66242fa3ed31
+		summarizeBy: none
+		sourceColumn: visit_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column market_measure_master_name
+		dataType: string
+		lineageTag: 13c7a6e3-5c0d-428e-9f79-de3f28be29ad
+		summarizeBy: none
+		sourceColumn: market_measure_master_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column measure_mapping_instruction
+		dataType: string
+		lineageTag: 7797a958-a30c-4acf-baa9-93ad046e8ef1
+		summarizeBy: none
+		sourceColumn: measure_mapping_instruction
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_id
+		dataType: string
+		lineageTag: 027ebf6e-aa62-4e17-b0c2-776037ce301c
+		summarizeBy: none
+		sourceColumn: store_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_id
+		dataType: string
+		lineageTag: 65f92526-4870-4fdb-a53c-0c268b28e672
+		summarizeBy: none
+		sourceColumn: category_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_name
+		dataType: string
+		lineageTag: bd07f2d9-932f-4fb4-a392-532116ed9f22
+		summarizeBy: none
+		sourceColumn: category_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column actual
+		dataType: int64
+		formatString: 0
+		lineageTag: f508a0b4-4a26-472f-a85a-033431e8428a
+		summarizeBy: sum
+		sourceColumn: actual
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+	column total
+		dataType: int64
+		formatString: 0
+		lineageTag: de4c0c72-e135-4fc1-b997-f1d7379df1f9
+		summarizeBy: sum
+		sourceColumn: total
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+	column site_type_name
+		dataType: string
+		lineageTag: 8e80085f-255c-44dc-bfe2-6a744e98b8fc
+		summarizeBy: none
+		sourceColumn: site_type_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vn_sfdc_sf_vgp_promo_fct = m
+		mode: import
+		queryGroup: Fact
+		source =
+				let
+				    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+				    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+				    nexa_msv_workbench_gold_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench_gold",Kind="Schema"]}[Data],
+				    vn_sfdc_sf_vgp_promo_fct_Table = nexa_msv_workbench_gold_Schema{[Name="vn_sfdc_sf_vgp_promo_fct",Kind="Table"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(vn_sfdc_sf_vgp_promo_fct_Table,{{"visitdate", type date}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"id", "update_date", "insert_date", "ama_last_processed_date"}),
+				    #"Filtered Rows" = Table.SelectRows(#"Removed Columns", each ([kpi_type] = "VGP")),
+				    #"Merged Queries" = Table.NestedJoin(#"Filtered Rows", {"store_id"}, dim_sfdc_store, {"pr_key"}, "vn_store_sfdc_dim", JoinKind.LeftOuter),
+				    #"Expanded vn_store_sfdc_dim" = Table.ExpandTableColumn(#"Merged Queries", "vn_store_sfdc_dim", {"site_type_name"}, {"site_type_name"})
+				in
+				    #"Expanded vn_store_sfdc_dim"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+

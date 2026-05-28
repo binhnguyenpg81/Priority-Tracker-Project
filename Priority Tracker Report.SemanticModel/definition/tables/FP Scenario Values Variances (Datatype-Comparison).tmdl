@@ -1,0 +1,104 @@
+table 'FP Scenario Values Variances (Datatype-Comparison)'
+	lineageTag: 2453a779-2cb4-401d-a680-efd63f2cc126
+
+	column 'FP Scenario Values Variances'
+		lineageTag: f3037c76-912e-415d-8258-3deb4145effb
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'FP Scenario Values Variances Order'
+
+		relatedColumnDetails
+			groupByColumn: 'FP Scenario Values Variances Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'FP Scenario Values Variances Fields'
+		isHidden
+		lineageTag: 49078780-f5c9-40ce-af25-7ec6d4c0a7bf
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'FP Scenario Values Variances Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'FP Scenario Values Variances Order'
+		isHidden
+		formatString: 0
+		lineageTag: 0d24001a-2cd5-4e67-945a-41ce6395e0e6
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'MetricName Key'
+		lineageTag: daa8a534-15a0-43d2-8143-40db9d5ecf89
+		summarizeBy: none
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'FP Scenario Values Variances (Datatype-Comparison)' = calculated
+		mode: import
+		source =
+				{
+				    ("∆PY",     NAMEOF('00 Measure'[Shipment # Value ∆PY]),                     0,  "ValuePY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[Shipment # Value ∆PY | Normal Format]),     1,  "ValuePY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[Shipment # Value ∆PY%]),                    2,  "ValuePY"),
+				    ("∆PY",     NAMEOF('00 Measure'[Shipment # Volume ∆PY]),                    3,  "VolumePY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[Shipment # Volume ∆PY | Normal Format]),    4,  "VolumePY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[Shipment # Volume ∆PY%]),                   5,  "VolumePY"),
+				    ("∆TG",     NAMEOF('00 Measure'[Shipment # Value ∆TG]),                     6,  "ValueTG"),
+				    ("∆TG ",    NAMEOF('00 Measure'[Shipment # Value ∆TG | Normal Format]),     7,  "ValueTG"),
+				    ("∆TG%",    NAMEOF('00 Measure'[Shipment # Value ∆TG%]),                    8,  "ValueTG"),
+				    ("∆TG",     NAMEOF('00 Measure'[Shipment # Volume ∆TG]),                    9,  "VolumeTG"),
+				    ("∆TG ",    NAMEOF('00 Measure'[Shipment # Volume ∆TG | Normal Format]),    10,  "VolumeTG"),
+				    ("∆TG%",    NAMEOF('00 Measure'[Shipment # Volume ∆TG%]),                   11,  "VolumeTG"),
+				    ("∆PY",     NAMEOF('00 Measure'[Sellout # Value RTDC ∆PY]),                 12,  "RTDCPY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[Sellout # Value RTDC ∆PY | Normal Format]), 13,  "RTDCPY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[Sellout # Value RTDC ∆PY%]),                14,  "RTDCPY"),
+				    ("∆PY",     NAMEOF('00 Measure'[Sellout # Value POS ∆PY]),                  15,  "POSPY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[Sellout # Value POS ∆PY | Normal Format]),  16,  "POSPY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[Sellout # Value POS ∆PY%]),                 17,  "POSPY"),
+				    ("∆PY",     NAMEOF('00 Measure'[DGP # Value ∆PY]),                          18,  "DGPPY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[DGP # Value ∆PY | Normal Format]),          19,  "DGPPY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[DGP # Value ∆PY%]),                         20,  "DGPPY"),
+				    ("∆PY",     NAMEOF('00 Measure'[QDGP # Value ∆PY]),                         21,  "QDGPPY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[QDGP # Value ∆PY | Normal Format]),         22,  "QDGPPY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[QDGP # Value ∆PY%]),                        23,  "QDGPPY"),
+				    ("∆TG",     NAMEOF('00 Measure'[QDGP # Value ∆TG]),                         24,  "QDGPTG"),
+				    ("∆TG ",    NAMEOF('00 Measure'[QDGP # Value ∆TG | Normal Format]),         25,  "QDGPTG"),
+				    ("∆TG%",    NAMEOF('00 Measure'[QDGP # Value ∆TG%]),                        26,  "QDGPTG"),
+				    ("∆PY",     NAMEOF('00 Measure'[SOS # Value ∆PY]),                          27,  "SOSPY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[SOS # Value ∆PY | Normal Format]),          28,  "SOSPY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[SOS # Value ∆PY%]),                         29,  "SOSPY"),
+				    ("∆TG",     NAMEOF('00 Measure'[SOS # Value ∆TG]),                          30,  "SOSTG"),
+				    ("∆TG ",    NAMEOF('00 Measure'[SOS # Value ∆TG | Normal Format]),          31,  "SOSTG"),
+				    ("∆TG%",    NAMEOF('00 Measure'[SOS # Value ∆TG%]),                         32,  "SOSTG"),
+				    ("∆PY",     NAMEOF('00 Measure'[SOD # Value ∆PY]),                          33,  "SODPY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[SOD # Value ∆PY | Normal Format]),          34,  "SODPY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[SOD # Value ∆PY%]),                         35,  "SODPY"),
+				    ("∆TG",     NAMEOF('00 Measure'[SOD # Value ∆TG]),                          36,  "SODTG"),
+				    ("∆TG ",    NAMEOF('00 Measure'[SOD # Value ∆TG | Normal Format]),          37,  "SODTG"),
+				    ("∆TG%",    NAMEOF('00 Measure'[SOD # Value ∆TG%]),                         38,  "SODTG"),
+				    ("∆PY",     NAMEOF('00 Measure'[VGP # Value ∆PY]),                          39,  "VGPPY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[VGP # Value ∆PY | Normal Format]),          40,  "VGPPY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[VGP # Value ∆PY%]),                         41,  "VGPPY"),
+				    ("∆TG",     NAMEOF('00 Measure'[VGP # Value ∆TG]),                          42,  "VGPTG"),
+				    ("∆TG ",    NAMEOF('00 Measure'[VGP # Value ∆TG | Normal Format]),          43,  "VGPTG"),
+				    ("∆TG%",    NAMEOF('00 Measure'[VGP # Value ∆TG%]),                         44,  "VGPTG"),
+				    ("∆PY",     NAMEOF('00 Measure'[IGP # Distribution ∆PY]),                   45,  "IGPPY"),
+				    ("∆PY ",    NAMEOF('00 Measure'[IGP # Distribution ∆PY | Normal Format]),   46,  "IGPPY"),
+				    ("∆PY%",    NAMEOF('00 Measure'[IGP # Distribution ∆PY%]),                  47,  "IGPPY"),
+				    ("∆TG",     NAMEOF('00 Measure'[IGP # Distribution ∆TG]),                   48,  "IGPTG"),
+				    ("∆TG ",    NAMEOF('00 Measure'[IGP # Distribution ∆TG | Normal Format]),   49,  "IGPTG"),
+				    ("∆TG%",    NAMEOF('00 Measure'[IGP # Distribution ∆TG%]),                  50,  "IGPTG")
+				}
+
+	annotation PBI_Id = ef5d9fac8ddb4aac984305cd16a20a19
+

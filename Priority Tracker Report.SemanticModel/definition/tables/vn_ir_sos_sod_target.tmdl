@@ -1,0 +1,135 @@
+table vn_ir_sos_sod_target
+	lineageTag: b6cd9632-4848-4be2-97e8-6246828eb500
+
+	column linear
+		lineageTag: b04febc0-5926-414e-857b-bcb3624dbdc9
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [linear]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column visit_in_month
+		formatString: 0
+		lineageTag: e4e3567b-a08b-492b-a735-2f4ad2e49329
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [visit_in_month]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'avg total'
+		lineageTag: 963c4252-36ad-4ec1-ba76-d58060951c6c
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [avg total]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column date = DATE(LEFT(vn_ir_sos_sod_target[year_month],4), RIGHT(vn_ir_sos_sod_target[year_month],2),1)
+		formatString: Short Date
+		lineageTag: 6cfe8d14-836f-4611-829c-061d739e33b5
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column year_month
+		lineageTag: 53855296-593c-46d6-be5e-2a58847a3565
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: sos_sod_fct_sb[year_month]
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_id
+		lineageTag: 510c41f7-200c-4171-8fd6-93e5129971f2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: sos_sod_fct_sb[store_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column type_total
+		lineageTag: bf144427-d10f-4bc9-8552-db9db3c9fc8a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: sos_sod_fct_sb[type_total]
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_total
+		lineageTag: 874403a6-6350-448e-a25f-d185c724d467
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: sos_sod_fct_sb[category_total]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vn_ir_sos_sod_target = calculated
+		mode: import
+		source = ```
+				
+				VAR _hsm =
+				    ADDCOLUMNS(
+				        SUMMARIZE(
+				            sos_sod_fct_hsm,
+				            sos_sod_fct_hsm[year_month],
+				            sos_sod_fct_hsm[store_id],
+				            sos_sod_fct_hsm[type],
+				            sos_sod_fct_hsm[category_total],
+				            "linear", SUM(sos_sod_fct_hsm[linear]),
+				            "visit_in_month", DISTINCTCOUNT(sos_sod_fct_hsm[visit_id])
+				        ),
+				        "avg total", [linear] / [visit_in_month]
+				    )
+				
+				VAR _smallbox =
+				    ADDCOLUMNS(
+				        SUMMARIZE(
+				            sos_sod_fct_sb,
+				            sos_sod_fct_sb[year_month],
+				            sos_sod_fct_sb[store_id],
+				            sos_sod_fct_sb[type_total],
+				            sos_sod_fct_sb[category_total],
+				            "linear", SUM(sos_sod_fct_sb[actual]),
+				            "visit_in_month", DISTINCTCOUNT(sos_sod_fct_sb[visit_id])
+				        ),
+				        "avg total", [linear] / [visit_in_month]
+				    )
+				
+				// VAR _result =
+				//     UNION(
+				//         SELECTCOLUMNS(
+				//             _hsm,
+				//             "yearmonth", [yearmonth],
+				//             "store_id", [internal_code],
+				//             "type", [type],
+				//             "category_brand", [category_brand],
+				//             "linear", [linear],
+				//             "visit_in_month", [visit_in_month],
+				//             "avg total", [avg total]
+				//         ),
+				
+				//         SELECTCOLUMNS(
+				//             _smallbox,
+				//             "yearmonth", [year_month],
+				//             "store_id", [store_id],
+				//             "type", [type],
+				//             "category_brand", [shipment_category_brand],
+				//             "linear", [linear],
+				//             "visit_in_month", [visit_in_month],
+				//             "avg total", [avg total]
+				//         )
+				//     )
+				VAR _result = 
+				UNION(_hsm,_smallbox)
+				RETURN
+				_smallbox
+				```
+
+	annotation PBI_Id = eaa85afb951442958a85126ede183702
+

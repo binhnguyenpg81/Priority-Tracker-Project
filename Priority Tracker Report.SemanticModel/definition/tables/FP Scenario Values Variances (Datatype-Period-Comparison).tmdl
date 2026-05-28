@@ -1,0 +1,67 @@
+table 'FP Scenario Values Variances (Datatype-Period-Comparison)'
+	lineageTag: b0992a47-4fbb-4b56-a80f-c975ff8f5227
+
+	column 'FP Scenario Values Variances'
+		lineageTag: 69a90ad9-1429-4a32-80ce-32f585348533
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Parameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Parameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parameter Fields'
+		isHidden
+		lineageTag: eecf9eeb-21af-4233-bb4f-0bfdbcd0af22
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Parameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parameter Order'
+		isHidden
+		formatString: 0
+		lineageTag: bfa74459-cdd6-4460-85ff-aa4776392336
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'MetricName Key'
+		lineageTag: 9829af9c-75b2-42e5-8558-fd173fa3ff3a
+		summarizeBy: none
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'FP Scenario Values Variances (Datatype-Period-Comparison)' = calculated
+		mode: import
+		source =
+				{
+				    ("FYTD ∆PY",    NAMEOF('00 Measure'[Shipment # Value FYTD ∆PY]),                    0,      "ValueFYTDPY"),
+				    ("FYTD ∆PY ",   NAMEOF('00 Measure'[Shipment # Value FYTD ∆PY | Normal Format]),    1,      "ValueFYTDPY"),
+				    ("FYTD ∆PY%",   NAMEOF('00 Measure'[Shipment # Value FYTD ∆PY%]),                   2,      "ValueFYTDPY"),
+				    ("FYTD ∆TG",    NAMEOF('00 Measure'[Shipment # Value FYTD ∆TG]),                    3,      "ValueFYTDTG"),
+				    ("FYTD ∆TG ",   NAMEOF('00 Measure'[Shipment # Value FYTD ∆TG | Normal Format]),    4,      "ValueFYTDTG"),
+				    ("FYTD ∆TG%",   NAMEOF('00 Measure'[Shipment # Value FYTD ∆TG%]),                   5,      "ValueFYTDTG"),
+				    ("FYTD PY",     NAMEOF('00 Measure'[Sellout # Value RTDC FYTD PY]),                 6,      "RTDCFYTDPY"),
+				    ("FYTD ∆PY",    NAMEOF('00 Measure'[Sellout # Value RTDC FYTD ∆PY]),                7,      "RTDCFYTDPY"),
+				    ("FYTD ∆PY ",   NAMEOF('00 Measure'[Sellout # Value RTDC FTYD ∆PY | Normal Format]),8,      "RTDCFYTDPY"),
+				    ("FYTD IYA",    NAMEOF('00 Measure'[Sellout # Value RTDC FYTD ∆PY%]),               9,      "RTDCFYTDPY"),
+				    ("FYTD PY",     NAMEOF('00 Measure'[Sellout # Value POS FYTD PY]),                  10,     "POSFYTDPY"),
+				    ("FYTD ∆PY",    NAMEOF('00 Measure'[Sellout # Value POS FYTD ∆PY]),                 11,     "POSFYTDPY"),
+				    ("FYTD ∆PY ",   NAMEOF('00 Measure'[Sellout # Value POS FYTD ∆PY | Normal Format]), 12,     "POSFYTDPY"),
+				    ("FYTD IYA",    NAMEOF('00 Measure'[Sellout # Value POS FYTD ∆PY%]),                13,     "POSFYTDPY")
+				}
+
+	annotation PBI_Id = 987fc8c2c27c482bb58ac714a0d7b980
+

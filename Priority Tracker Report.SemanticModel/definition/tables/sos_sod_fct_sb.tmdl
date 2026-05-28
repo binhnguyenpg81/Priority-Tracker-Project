@@ -1,0 +1,123 @@
+table sos_sod_fct_sb
+	lineageTag: 99ee79cf-cbba-4cab-9e61-c1ea84e97454
+
+	column type
+		dataType: string
+		lineageTag: ab5ae964-b3ec-4970-b53b-8482aa00f775
+		summarizeBy: none
+		sourceColumn: type
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_id
+		dataType: string
+		lineageTag: 365840ad-9e9d-4f1b-a8f7-34308bc293b2
+		summarizeBy: none
+		sourceColumn: store_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column visit_id
+		dataType: string
+		lineageTag: 2da13312-3cf5-484f-8a8d-b58421db2f4b
+		summarizeBy: none
+		sourceColumn: visit_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column visit_date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 1d438c23-0777-4d86-8b10-bdf8d0120017
+		summarizeBy: none
+		sourceColumn: visit_date
+
+		variation Variation
+			isDefault
+			relationship: 595bba4b-f110-4b87-8960-2d65414d686a
+			defaultHierarchy: LocalDateTable_1234a220-7c01-47c0-9513-db0708df4a89.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column year_month
+		dataType: string
+		lineageTag: 001459ba-d565-411a-951d-03f185a5d99e
+		summarizeBy: none
+		sourceColumn: year_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column actual
+		dataType: double
+		formatString: 0.00
+		lineageTag: 3e7a56d7-c37f-4e4c-8088-176ad6774b92
+		summarizeBy: sum
+		sourceColumn: actual
+
+		annotation SummarizationSetBy = Automatic
+
+	column brand
+		dataType: string
+		lineageTag: 2f2e85c6-c0f5-40b2-ab63-213477924d24
+		summarizeBy: none
+		sourceColumn: brand
+
+		annotation SummarizationSetBy = Automatic
+
+	column category
+		dataType: string
+		lineageTag: 1da24707-e9a2-4c88-9ff1-05b339d8d160
+		summarizeBy: none
+		sourceColumn: category
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_total
+		dataType: string
+		lineageTag: e0ad7b0c-bcef-469f-9800-13e41fd4caf0
+		summarizeBy: none
+		sourceColumn: category_total
+
+		annotation SummarizationSetBy = Automatic
+
+	column type_total = ```
+			
+			SWITCH(
+			    
+			    TRUE(),
+			    CONTAINSSTRING(sos_sod_fct_sb[type], "SOS"), "SOS",
+			        CONTAINSSTRING(sos_sod_fct_sb[type], "SOD"), "SOD"
+			)
+			```
+		lineageTag: 6a2f6114-f80d-4f00-95dd-15008532b593
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition sos_sod_fct_sb = m
+		mode: import
+		queryGroup: Fact
+		source =
+				let
+				    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+				    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+				    nexa_msv_workbench_gold_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench_gold",Kind="Schema"]}[Data],
+				    vn_sfdc_sf_sos_fct_Table = nexa_msv_workbench_gold_Schema{[Name="vn_sfdc_sf_sod_sos_fct",Kind="Table"]}[Data],
+				    #"Capitalized Each Word" = Table.TransformColumns(vn_sfdc_sf_sos_fct_Table,{{"brand", Text.Proper, type text}, {"category", Text.Proper, type text}}),
+				    #"Replaced Value" = Table.ReplaceValue(#"Capitalized Each Word","SOS check","SOS",Replacer.ReplaceText,{"type"}),
+				    #"Replaced Value1" = Table.ReplaceValue(#"Replaced Value","SOD check","SOD",Replacer.ReplaceText,{"type"}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Replaced Value1",{"type", "brand", "category", "store_id", "visit_id", "visit_date", "year_month", "actual"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed Other Columns",{{"actual", type number}}),
+				    #"Merged Queries" = Table.NestedJoin(#"Changed Type", {"store_id"}, dim_sfdc_store, {"pr_key"}, "vn_store_sfdc_dim", JoinKind.LeftOuter),
+				    #"Expanded vn_store_sfdc_dim" = Table.ExpandTableColumn(#"Merged Queries", "vn_store_sfdc_dim", {"site_type_name"}, {"site_type_name"}),
+				    #"Filtered Rows" = Table.SelectRows(#"Expanded vn_store_sfdc_dim", each ([site_type_name] = "IMR")),
+				    #"Removed Columns" = Table.RemoveColumns(#"Filtered Rows",{"site_type_name"}),
+				    #"Merged Queries1" = Table.NestedJoin(#"Removed Columns", {"category"}, #"VN_Product Hierarchy Mapping_Datahub_SFDC_SFDC", {"Category_Original"}, "VN_Product Hierarchy Mapping_Datahub_SFDC_SFDC", JoinKind.LeftOuter),
+				    #"Expanded VN_Product Hierarchy Mapping_Datahub_SFDC_SFDC" = Table.ExpandTableColumn(#"Merged Queries1", "VN_Product Hierarchy Mapping_Datahub_SFDC_SFDC", {"Category_Shipment"}, {"category_total"})
+				in
+				    #"Expanded VN_Product Hierarchy Mapping_Datahub_SFDC_SFDC"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+

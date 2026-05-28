@@ -1,0 +1,57 @@
+table 'Scenario Selection TimePeriod'
+	lineageTag: 29707b56-0636-4667-81f7-164f3dcf883b
+
+	column Per_ID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9c881a55-d6b8-4052-bb07-3ad260102c81
+		summarizeBy: count
+		sourceColumn: Per_ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Per_Name
+		dataType: string
+		lineageTag: cda44d1f-921d-48c8-b45a-91be2fd65f72
+		summarizeBy: none
+		sourceColumn: Per_Name
+		sortByColumn: Per_ID
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column Per_DisplayName
+		dataType: string
+		lineageTag: d34592e0-5005-47c0-bb11-5032f007bc6e
+		summarizeBy: none
+		sourceColumn: Per_DisplayName
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Per_Display Name Alt.'
+		dataType: string
+		lineageTag: ea578916-818e-4991-af74-4fab80948db0
+		summarizeBy: none
+		sourceColumn: Per_Display Name Alt.
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Scenario Selection TimePeriod' = m
+		mode: import
+		queryGroup: Parameter
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("TYqxCoMwFEV/JWR2aW3TOgrBQXi2YJcSHFIJbSFNJCaCf98YkJflXLjnCEEPtKDN88GzCVqTVUlHvCVcekWHQtBjNPcSkE4tXxtmUpKfNf4zp6rcDAPkXrG8Om2mAuReVXl1jqate2TQdXj3akqWxefWceToO7twNSZ72foGkNI06gXSJXuNTw0tcnIg1zYYOgx/", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [ID = _t, Name = _t, #"Display Name" = _t, #"Display Name Alt." = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"ID", Int64.Type}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"ID", "Per_ID"}, {"Name", "Per_Name"}, {"Display Name", "Per_DisplayName"}, {"Display Name Alt.", "Per_Display Name Alt."}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

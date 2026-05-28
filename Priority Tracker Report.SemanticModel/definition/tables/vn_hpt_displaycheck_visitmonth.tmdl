@@ -1,0 +1,154 @@
+table vn_hpt_displaycheck_visitmonth
+	lineageTag: b77ca88f-7713-4811-8e08-1a89bc78753f
+
+	column date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 93cfb682-7d75-4620-8616-c7c34434a669
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column display_distributor_code
+		dataType: string
+		lineageTag: 31f8a00c-e5f5-41f3-9a81-1ff42d82ebaf
+		summarizeBy: none
+		sourceColumn: display_distributor_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column display_store_code
+		dataType: string
+		lineageTag: 8b449db9-8110-4f44-8a35-a034beb7b034
+		summarizeBy: none
+		sourceColumn: display_store_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column compliance_actual
+		dataType: string
+		lineageTag: 130575f1-39a7-46db-9228-951965b25c5a
+		summarizeBy: none
+		sourceColumn: compliance_actual
+
+		annotation SummarizationSetBy = Automatic
+
+	column compliance_target
+		dataType: string
+		lineageTag: 62517ca0-9d37-494d-b0c4-e435d2375c05
+		summarizeBy: none
+		sourceColumn: compliance_target
+
+		annotation SummarizationSetBy = Automatic
+
+	column percentage_of_compliance
+		dataType: double
+		formatString: 0.0
+		lineageTag: 35a66383-cb31-48d2-b7cd-f1beebf07dd0
+		summarizeBy: sum
+		sourceColumn: percentage_of_compliance
+
+		annotation SummarizationSetBy = Automatic
+
+	column year_month
+		dataType: string
+		lineageTag: 01acea82-5305-44d9-bbf5-18b3772e8830
+		summarizeBy: none
+		sourceColumn: year_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column display_program
+		dataType: string
+		lineageTag: b84fde3d-7bb3-4470-9c9b-d5a9ec2c6efe
+		summarizeBy: none
+		sourceColumn: display_program
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_key = ```
+			
+			VAR _key = vn_hpt_displaycheck_visitmonth[display_branch_id] & vn_hpt_displaycheck_visitmonth[display_store_code]
+			VAR _date = vn_hpt_displaycheck_visitmonth[date]
+			VAR _store_key = 
+			LOOKUPVALUE(
+			    dim_indirect_store[pr_key],
+			    dim_indirect_store[seller_key],
+			    _key)
+			VAR _before =
+			    CALCULATE(
+			        MAX(dim_indirect_store_hist[begin_date]),
+			        FILTER(
+			            dim_indirect_store_hist,
+			            dim_indirect_store_hist[branch_key] = _key
+			                && dim_indirect_store_hist[begin_date] <= _date
+			        )
+			    )
+			
+			VAR _after =
+			    CALCULATE(
+			        MIN(dim_indirect_store_hist[begin_date]),
+			        FILTER(
+			            dim_indirect_store_hist,
+			            dim_indirect_store_hist[branch_key] = _key
+			                && dim_indirect_store_hist[begin_date] > _date
+			        )
+			    )
+			
+			VAR _closest =
+			    IF(
+			        NOT ISBLANK(_before),
+			        _before,       -- ưu tiên after
+			        _after       -- chỉ lấy before khi after blank
+			    )
+			
+			VAR _last_result =
+			    CALCULATE(
+			        MAX(dim_indirect_store_hist[store_key]),
+			        FILTER(
+			            dim_indirect_store_hist,
+			            dim_indirect_store_hist[branch_key] = _key
+			                && dim_indirect_store_hist[begin_date] = _closest
+			        )
+			    )
+			RETURN
+			_store_key
+			```
+		lineageTag: dcfba411-22b1-4f27-8901-eb37ba62622c
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column display_branch_id
+		dataType: string
+		lineageTag: 57b423cf-9369-4216-8125-e9fbc9873eb4
+		summarizeBy: none
+		sourceColumn: display_branch_id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vn_hpt_displaycheck_visitmonth = m
+		mode: import
+		queryGroup: Fact
+		source =
+				let
+				    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+				    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+				    nexa_msv_workbench_gold_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench_gold",Kind="Schema"]}[Data],
+				    vn_hpt_displaycheck_visitmonth_Table = nexa_msv_workbench_gold_Schema{[Name="vn_hpt_displaycheck_visitmonth",Kind="Table"]}[Data],
+				    #"Filtered Rows" = Table.SelectRows(vn_hpt_displaycheck_visitmonth_Table, each ([year_month] <> null)),
+				    #"Split Column by Delimiter" = Table.SplitColumn(#"Filtered Rows", "year_month", Splitter.SplitTextByEachDelimiter({"M"}, QuoteStyle.Csv, false), {"year_month.1", "year_month.2"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"year_month.1", Int64.Type}, {"year_month.2", Int64.Type}}),
+				    #"Added Conditional Column" = Table.AddColumn(#"Changed Type", "Custom", each if [year_month.2] < 10 then "M0" else "M"),
+				    #"Inserted Merged Column" = Table.AddColumn(#"Added Conditional Column", "year_month", each Text.Combine({Text.From([year_month.1], "en-US"), [Custom], Text.From([year_month.2], "en-US")}, ""), type text),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Inserted Merged Column",{"date", "display_distributor_code", "display_branch_id", "display_store_code", "display_program", "compliance_actual", "compliance_target", "percentage_of_compliance", "year_month"})
+				in
+				    #"Removed Other Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

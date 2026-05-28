@@ -1,0 +1,69 @@
+table 'FP Scenario Values Comparison Column Chart'
+	lineageTag: c4cb4dd6-322d-4371-b568-dfb340ca9183
+
+	column 'FP Scenario Values Comparison'
+		lineageTag: c06ab49f-b873-4dec-9a96-4b3051743f29
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Parameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Parameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parameter Fields'
+		isHidden
+		lineageTag: 2407db50-ee11-4d29-976f-79a21689ec50
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Parameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parameter Order'
+		isHidden
+		formatString: 0
+		lineageTag: 5d8ab231-6454-408c-82a4-bd4e45409723
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'MetricName Key'
+		lineageTag: a5e1c5f6-78f5-4d41-87fb-9d7a1bee9a52
+		summarizeBy: none
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'FP Scenario Values Comparison Column Chart' = calculated
+		mode: import
+		source =
+				{
+				    ("PY", NAMEOF('00 Measure'[Shipment # Value PY L12M]),          1, "ValuePY"),
+				    ("TG", NAMEOF('00 Measure'[Shipment # Value Target L12M]),      2, "ValueTG"),
+				    ("PY", NAMEOF('00 Measure'[Shipment # Volume PY L12M]),         3, "VolumePY"),
+				    ("TG", NAMEOF('00 Measure'[Shipment # Volume Target L12M]),     4, "VolumeTG"),
+				    ("PY", NAMEOF('00 Measure'[Sellout # Value RTDC PY L12M]),      5, "RTDCPY"),
+				    ("PY", NAMEOF('00 Measure'[DGP # Value PY L12M]),               6, "DGPPY"),
+				    ("PY", NAMEOF('00 Measure'[QDGP # Value PY L12M]),              7, "QDGPPY"),
+				    ("TG", NAMEOF('00 Measure'[QDGP # Value Target L12M]),          8, "QDGPTG"),
+				    ("PY", NAMEOF('00 Measure'[SOS # Value PY L12M]),               9, "SOSPY"),
+				    ("TG", NAMEOF('00 Measure'[SOS # Value Target L12M]),           10, "SOSTG"),
+				    ("PY", NAMEOF('00 Measure'[SOD # Value PY L12M]),               11, "SODPY"),
+				    ("TG", NAMEOF('00 Measure'[SOD # Value Target L12M]),           12, "SODTG"),
+				    ("PY", NAMEOF('00 Measure'[VGP # Value PY L12M]),               13, "VGPPY"),
+				    ("TG", NAMEOF('00 Measure'[VGP # Value Target L12M]),           14, "VGPTG"),
+				    ("PY", NAMEOF('00 Measure'[IGP # Distribution PY L12M]),        15, "IGPPY"),
+				    ("TG", NAMEOF('00 Measure'[IGP # Distribution Target L12M]),    16, "IGPTG")
+				}
+
+	annotation PBI_Id = 10082ee95e4d4a31b4540f2c9adf99eb
+

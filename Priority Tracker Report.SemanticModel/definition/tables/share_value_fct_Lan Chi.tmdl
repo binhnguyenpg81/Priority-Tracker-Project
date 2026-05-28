@@ -1,0 +1,74 @@
+table 'share_value_fct_Lan Chi'
+	lineageTag: bc60b90a-a2dd-4ffb-bf2f-8ace2ad16fda
+
+	column customer
+		dataType: string
+		lineageTag: 2866b936-d83d-4a53-bf00-3a1f806d74d8
+		summarizeBy: none
+		sourceColumn: customer
+
+		annotation SummarizationSetBy = Automatic
+
+	column category
+		dataType: string
+		lineageTag: 4becb702-76b5-4e4e-8f04-6b9398565916
+		summarizeBy: none
+		sourceColumn: category
+
+		annotation SummarizationSetBy = Automatic
+
+	column date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: c84b5acc-96c2-4546-b593-b2b4cf5c167b
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Category (modified)'
+		dataType: string
+		lineageTag: dfa21c1e-8546-475a-aef8-aec5577a0e30
+		summarizeBy: none
+		sourceColumn: Category (modified)
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value
+		dataType: double
+		lineageTag: 9db08986-4414-4a71-bcc0-ed60f6227e45
+		summarizeBy: sum
+		sourceColumn: Value
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'share_value_fct_Lan Chi' = m
+		mode: import
+		queryGroup: Fact
+		source =
+				let
+				    Source = PowerPlatform.Dataflows(),
+				    Workspaces = Source{[Id="Workspaces"]}[Data],
+				    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+				    #"c2702488-9142-4872-83de-e36ced0eee99" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="c2702488-9142-4872-83de-e36ced0eee99"]}[Data],
+				    vn_smallbox_value_share_ = #"c2702488-9142-4872-83de-e36ced0eee99"{[entity="vn_smallbox_value_share",version=""]}[Data],
+				    #"Filtered Rows" = Table.SelectRows(vn_smallbox_value_share_, each ([Agency] = "LAN CHI") and ([Customer] = "Lan Chi - P&G")),
+				    #"Replaced Value" = Table.ReplaceValue(#"Filtered Rows","LAN CHI","Lan Chi",Replacer.ReplaceText,{"Agency"}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Replaced Value",{"Customer"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"Agency", "customer"}, {"CAT", "category"}, {"Attribute", "date"}}),
+				    #"Added Custom" = Table.AddColumn(#"Renamed Columns", "Custom", each [Value]/1000),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Added Custom",{"Value"}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns1",{{"Custom", "Value"}})
+				in
+				    #"Renamed Columns1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

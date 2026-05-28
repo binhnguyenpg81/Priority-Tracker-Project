@@ -1,0 +1,93 @@
+table vn_indirect_psku
+	lineageTag: ce3f7ca7-9ccc-4723-a5d3-cdefc2696be4
+
+	column day_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: f84ceae2-1b54-4fd3-bf44-7f998f392520
+		summarizeBy: none
+		sourceColumn: day_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column DGP_P1M
+		dataType: int64
+		formatString: 0
+		lineageTag: b08e8e5f-d58a-4f88-8774-5c7499f1d3b3
+		summarizeBy: sum
+		sourceColumn: DGP_P1M
+
+		annotation SummarizationSetBy = Automatic
+
+	column DGP_P2M
+		dataType: int64
+		formatString: 0
+		lineageTag: fb56dca2-31ec-4a1d-93f5-3fd4bb526805
+		summarizeBy: sum
+		sourceColumn: DGP_P2M
+
+		annotation SummarizationSetBy = Automatic
+
+	column DGP_P3M
+		dataType: int64
+		formatString: 0
+		lineageTag: 77ca8142-6340-498f-9fcd-146b64b41228
+		summarizeBy: sum
+		sourceColumn: DGP_P3M
+
+		annotation SummarizationSetBy = Automatic
+
+	column spku
+		dataType: int64
+		formatString: 0
+		lineageTag: c49858f0-9cb2-4f89-9c0f-2959b455c040
+		summarizeBy: sum
+		sourceColumn: spku
+
+		annotation SummarizationSetBy = Automatic
+
+	column prod_key
+		dataType: string
+		lineageTag: 21885390-a9c9-4c53-9fc6-42e3a0b0a353
+		summarizeBy: none
+		sourceColumn: prod_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_key
+		dataType: string
+		lineageTag: 22e87191-d570-4e6b-a60b-e3c24303c27a
+		summarizeBy: none
+		sourceColumn: store_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column psku_key
+		dataType: string
+		lineageTag: 51313236-87c8-452b-b302-3688261a659a
+		summarizeBy: none
+		sourceColumn: psku_key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vn_indirect_psku = m
+		mode: import
+		queryGroup: Fact
+		source =
+				let
+				    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+				    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+				    nexa_msv_workbench_gold_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench_gold",Kind="Schema"]}[Data],
+				    vn_indirect_shipment_fct_Table = nexa_msv_workbench_gold_Schema{[Name="vn_indirect_psku",Kind="Table"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(vn_indirect_shipment_fct_Table,{"day_date", "hist_productive_dist_prod_calc_ind_L1M", "hist_productive_dist_prod_calc_ind_L2M", "hist_productive_dist_prod_calc_ind_L3M", "hist_psku", "prod_key", "store_key", "psku_key"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed Other Columns",{{"prod_key", type text}, {"store_key", type text}, {"psku_key", type text}, {"day_date", type date}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"hist_productive_dist_prod_calc_ind_L1M", "DGP_P1M"}, {"hist_productive_dist_prod_calc_ind_L2M", "DGP_P2M"}, {"hist_productive_dist_prod_calc_ind_L3M", "DGP_P3M"}, {"hist_psku", "spku"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

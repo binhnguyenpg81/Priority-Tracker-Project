@@ -1,0 +1,157 @@
+table dim_indirect_store
+	lineageTag: 25e3c88c-9be1-424f-9dfa-12f75b033d68
+
+	column store_code
+		dataType: string
+		lineageTag: 2086fc2a-7ea3-4c01-bc7e-582d80b1906f
+		summarizeBy: none
+		sourceColumn: store_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer
+		dataType: string
+		lineageTag: 76d25b5c-1566-49fb-839d-8b2b404dbbda
+		summarizeBy: none
+		sourceColumn: customer
+
+		annotation SummarizationSetBy = Automatic
+
+	column sub_channel
+		dataType: string
+		lineageTag: 6e125dbf-7a84-45c1-a783-ac0ce709dec3
+		summarizeBy: none
+		sourceColumn: sub_channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column local_segment
+		dataType: string
+		lineageTag: d20b0dd5-6a85-4063-8b2b-f844afd23e50
+		summarizeBy: none
+		sourceColumn: local_segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column sub_channel_name
+		dataType: string
+		lineageTag: 77d95cca-8c4d-4ac5-909d-1c75e8d81171
+		summarizeBy: none
+		sourceColumn: sub_channel_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column pr_key
+		dataType: string
+		lineageTag: e2577663-3aeb-4496-a8f7-06caff72937c
+		summarizeBy: none
+		sourceColumn: pr_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column greenline_key = dim_indirect_store[branch_id] & dim_indirect_store[store_code]
+		lineageTag: fe01d485-d1dc-409f-a1d7-7d84e738e71c
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column site_type_name
+		dataType: string
+		lineageTag: 4e961424-4595-4b58-b937-f61b5311443e
+		summarizeBy: none
+		sourceColumn: site_type_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column branch_id
+		dataType: string
+		lineageTag: 4f1f7a5a-3438-4130-8532-17d5ec8a3c91
+		summarizeBy: none
+		sourceColumn: branch_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column local_customer_name
+		dataType: string
+		lineageTag: e4447cd3-0646-4542-bde7-e388d59f357a
+		summarizeBy: none
+		sourceColumn: local_customer_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_key = dim_indirect_store[branch_id] & dim_indirect_store[store_code]
+		lineageTag: 6f2c9b6c-30be-4f88-9bf1-a349cec43f23
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_id
+		dataType: string
+		lineageTag: 8156c9d2-4fbb-45c5-ab95-d1a52e4b25f8
+		summarizeBy: none
+		sourceColumn: seller_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_id_key = dim_indirect_store[branch_id] & dim_indirect_store[seller_id]
+		lineageTag: d2b4be72-8924-4160-929b-981683ef3281
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_store_id = ```
+			
+			VAR _max = 
+			CALCULATE(
+			    MAX(dim_indirect_store_hist[begin_date]),
+			    FILTER(
+			        dim_indirect_store_hist,
+			        dim_indirect_store[pr_key] = dim_indirect_store_hist[store_id]
+			    ))
+			VAR _channel = 
+			CALCULATE(
+			    MAX(dim_indirect_store_hist[sub_channel]),
+			    FILTER(
+			        dim_indirect_store_hist,
+			        dim_indirect_store[pr_key] = dim_indirect_store_hist[store_id] && dim_indirect_store_hist[begin_date] = _max
+			    ))
+			VAR _compare = 
+			IF(dim_indirect_store[sub_channel] = _channel, "Same","Different")
+			RETURN
+			_compare
+			```
+		lineageTag: b03c47c4-cd45-4cdf-a4c3-ab3199960a5d
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column store_name
+		dataType: string
+		lineageTag: ac4a9fa4-76b4-4dc0-ab0a-7339e6fb54c1
+		summarizeBy: none
+		sourceColumn: store_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column region_localchannel
+		dataType: string
+		lineageTag: 19ced707-11b1-42ea-b8e9-ba3331b4d2ab
+		summarizeBy: none
+		sourceColumn: region_localchannel
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_indirect_store = m
+		mode: import
+		queryGroup: Dimension
+		source =
+				let
+				    Source = Table.Combine({dim_indirect_store_smallbox,dim_indirect_store_do, dim_sfdc_store}),
+				    #"Removed Duplicates" = Table.Distinct(Source, {"pr_key"})
+				in
+				    #"Removed Duplicates"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+

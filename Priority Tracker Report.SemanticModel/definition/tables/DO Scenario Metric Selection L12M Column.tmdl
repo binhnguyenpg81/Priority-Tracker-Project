@@ -1,0 +1,59 @@
+table 'DO Scenario Metric Selection L12M Column'
+	lineageTag: c6663ecb-4a8d-43f1-9847-b43829de21d7
+
+	column 'DO Scenario Values'
+		lineageTag: b5f260cf-493f-423b-a797-401bdce5a5d8
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'DO Scenario Values Order'
+
+		relatedColumnDetails
+			groupByColumn: 'DO Scenario Values Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DO Scenario Values Fields'
+		isHidden
+		lineageTag: 68ab033e-a1a5-470b-bd40-c72d05a1f2eb
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'DO Scenario Values Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DO Scenario Values Order'
+		isHidden
+		formatString: 0
+		lineageTag: b8048f79-27c7-46c2-92c3-5f0e8ae43f67
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'MetricName Key'
+		lineageTag: 52b724ea-ae07-4616-a77a-7fcb5f377c65
+		summarizeBy: none
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'DO Scenario Metric Selection L12M Column' = calculated
+		mode: import
+		source =
+				{
+				    ("RTDC",                    NAMEOF('00 Measure'[Sellout # Value RTDC L12M WS]),                            0,                  "RTDC"),
+				    ("Coverage",                NAMEOF('00 Measure'[Sellout # Coverage L12M]),                              1,                  "Coverage"),
+				    ("DGP",                     NAMEOF('00 Measure'[DGP # Value L12M]),                                     2,                  "DGP"),
+				    ("QDGP",                    NAMEOF('00 Measure'[QDGP # Value L12M]),                                    3,                  "QDGP"),
+				    ("Golden store",            NAMEOF('00 Measure'[LP # Golden Store L12M]),                               4,                  "Golden store"),
+				    ("OT Bill",                 NAMEOF('00 Measure'[Bill # No.Bill L12M]),                                       5,                  "OT Bill/Day")
+				}
+
+	annotation PBI_Id = 13db49b7c2224d0e8bbb03897653bb47
+

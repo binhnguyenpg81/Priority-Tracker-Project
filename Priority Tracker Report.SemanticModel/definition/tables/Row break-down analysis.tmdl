@@ -1,0 +1,59 @@
+table 'Row break-down analysis'
+	lineageTag: 8d11c0e2-3f81-4811-beba-fb83aa1da8a9
+
+	column 'FP Row breakdown | V1'
+		lineageTag: 6e5080ae-0cb1-4e09-b80b-39fd49c497db
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Row break-down analysis Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Row break-down analysis Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Row break-down analysis Fields'
+		isHidden
+		lineageTag: 1f12ba56-90ce-40c2-96a5-9059c7108275
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Row break-down analysis Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Row break-down analysis Order'
+		isHidden
+		formatString: 0
+		lineageTag: 9b735ee6-6134-409b-8267-c625b78178bf
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Name
+		lineageTag: 7b676eec-740a-4c99-aad5-210297aa9ec8
+		summarizeBy: none
+		sourceColumn: [Value4]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Row break-down analysis' = calculated
+		mode: import
+		source =
+				
+				{
+				    ("Channel",             NAMEOF('dim_channel'[channel]),                     0,  "Channel"),
+				    ("Sub-Channel",         NAMEOF('dim_sub_channel'[sub_channel]),             1,  "Sub-Channel"),
+				    ("Customer",            NAMEOF('dim_customer_share_value'[customer]),       2,  "Customer"),
+				    ("Brand",               NAMEOF('dim_product'[brand]),                       4,  "Brand"),
+				    ("Category",            NAMEOF('dim_product'[category]),                    5,  "Category")
+				}
+
+	annotation PBI_Id = 940f19e098fb497bbfec545ec55e6a08
+

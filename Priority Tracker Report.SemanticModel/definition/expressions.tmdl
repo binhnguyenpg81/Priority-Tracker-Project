@@ -1,0 +1,449 @@
+expression 'Prod Server' = "adb-1405689875182560.0.azuredatabricks.net" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 71c0b754-e5f0-49ca-be1e-a26b25f0c59c
+	queryGroup: Parameter
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+
+expression 'Prod HTTP Path' = "sql/protocolv1/o/1405689875182560/0428-061324-1bphpcbr" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 5bcb02bf-204a-4aa5-9106-186f20348192
+	queryGroup: Parameter
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+
+expression vn_product_by_gtin_dim_vw =
+		let
+		    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+		    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+		    nexa_msv_workbench_gold_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench_gold",Kind="Schema"]}[Data],
+		    vn_product_by_gtin_dim_vw_Table = nexa_msv_workbench_gold_Schema{[Name="vn_product_by_gtin_dim_vw",Kind="Table"]}[Data],
+		    #"Extracted Last Characters" = Table.TransformColumns(vn_product_by_gtin_dim_vw_Table, {{"gtin_item", each Text.End(_, 13), type text}}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Extracted Last Characters",{{"gtin_item", "prod_key"}})
+		in
+		    #"Renamed Columns"
+	lineageTag: 924b018c-caeb-4b9f-b82d-5c416834dbf6
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression fct_psku_hsm =
+		let
+		    Source = PowerPlatform.Dataflows(null),
+		    Workspaces = Source{[Id="Workspaces"]}[Data],
+		    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+		    #"b44123ee-2a6a-47de-9760-809112b1019f" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="b44123ee-2a6a-47de-9760-809112b1019f"]}[Data],
+		    VN_HSM_PSKU_monthly_ = #"b44123ee-2a6a-47de-9760-809112b1019f"{[entity="VN_HSM_PSKU_monthly",version=""]}[Data],
+		    #"Removed Other Columns" = Table.SelectColumns(VN_HSM_PSKU_monthly_,{"Source.Name", "EAN", "FPC", "SubChannel", "PSKU", "PSKU Code"}),
+		    #"Split Column by Delimiter" = Table.SplitColumn(#"Removed Other Columns", "Source.Name", Splitter.SplitTextByDelimiter(":", QuoteStyle.Csv), {"Source.Name.1", "Source.Name.2"}),
+		    #"Split Column by Delimiter1" = Table.SplitColumn(#"Split Column by Delimiter", "Source.Name.1", Splitter.SplitTextByDelimiter(".", QuoteStyle.Csv), {"Source.Name.1.1", "Source.Name.1.2"}),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Split Column by Delimiter1",{{"Source.Name.1.1", type text}, {"Source.Name.1.2", type text}, {"Source.Name.2", type text}}),
+		    #"Split Column by Position" = Table.SplitColumn(#"Changed Type", "Source.Name.1.1", Splitter.SplitTextByPositions({0, 4}, true), {"Source.Name.1.1.1", "Source.Name.1.1.2"}),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Split Column by Position",{{"Source.Name.1.1.1", type text}, {"Source.Name.1.1.2", type text}, {"EAN", type text}}),
+		    #"Added Custom" = Table.AddColumn(
+		    #"Changed Type1",
+		    "date",
+		    each Date.FromText(
+		        "20" & Text.Start([Source.Name.1.1.2], 2) & "/" &
+		        Text.End([Source.Name.1.1.2], 2) & "/01"
+		    ),
+		    type date
+		),
+		    #"Removed Columns" = Table.RemoveColumns(#"Added Custom",{"Source.Name.1.1.1", "Source.Name.1.2", "Source.Name.2", "Source.Name.1.1.2"}),
+		    #"Reordered Columns" = Table.ReorderColumns(#"Removed Columns",{"date", "EAN", "FPC", "PSKU"}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns",{{"EAN", "gtin_item"}, {"FPC", "gtin_name"}, {"PSKU", "psku"}, {"SubChannel", "segmentation"}, {"PSKU Code", "psku_code"}}),
+		    #"Removed Duplicates" = Table.Distinct(#"Renamed Columns")
+		in
+		    #"Removed Duplicates"
+	lineageTag: b7b88532-3610-43b0-bb2a-30775947e765
+	queryGroup: Fact
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression fct_psku_sb =
+		let
+		    Source = PowerPlatform.Dataflows(null),
+		    Workspaces = Source{[Id="Workspaces"]}[Data],
+		    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+		    #"5e921964-4ce7-4d04-a8ca-6e4f283053cb" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="5e921964-4ce7-4d04-a8ca-6e4f283053cb"]}[Data],
+		    VN_Smallbox_PSKU_monthly_ = #"5e921964-4ce7-4d04-a8ca-6e4f283053cb"{[entity="VN_Smallbox_PSKU_monthly",version=""]}[Data],
+		    #"Removed Other Columns" = Table.SelectColumns(VN_Smallbox_PSKU_monthly_,{"Source.Name", "EAN", "FPC", "SubChannel", "PSKU", "PSKU Code"}),
+		    #"Split Column by Delimiter" = Table.SplitColumn(#"Removed Other Columns", "Source.Name", Splitter.SplitTextByDelimiter(".", QuoteStyle.Csv), {"Source.Name.1", "Source.Name.2"}),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"Source.Name.1", type text}, {"Source.Name.2", type text}}),
+		    #"Split Column by Position" = Table.SplitColumn(#"Changed Type", "Source.Name.1", Splitter.SplitTextByPositions({0, 4}, true), {"Source.Name.1.1", "Source.Name.1.2"}),
+		    #"Added Custom" = Table.AddColumn(#"Split Column by Position", "date", each Date.FromText(
+		        "20" & Text.Start([Source.Name.1.2], 2) & "/" &
+		        Text.End([Source.Name.1.2], 2) & "/01"
+		    )),
+		    #"Removed Columns" = Table.RemoveColumns(#"Added Custom",{"Source.Name.1.1", "Source.Name.1.2", "Source.Name.2"}),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Removed Columns",{{"EAN", type text}, {"date", type date}}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Changed Type1",{{"EAN", "gtin_item"}, {"FPC", "gtin_name"}, {"PSKU", "psku"}, {"SubChannel", "segmentation"}, {"PSKU Code", "psku_code"}})
+		in
+		    #"Renamed Columns"
+	lineageTag: 9c4b426f-3197-490a-abd6-6c4def9e85a9
+	queryGroup: Fact
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression fct_psku =
+		let
+		    Source = Table.Combine({fct_psku_hsm, fct_psku_sb}),
+		    #"Added Custom" = Table.AddColumn(
+		    Source,
+		    "year_month",
+		    each Text.From(Date.Year([date])) & "M" & Text.PadStart(Text.From(Date.Month([date])), 2, "0"),
+		    type text
+		),
+		    #"Added Custom1" = Table.AddColumn(#"Added Custom", "key_seg_month", each [year_month]&[segmentation])
+		in
+		    #"Added Custom1"
+	lineageTag: b2971de0-37a3-487b-a74b-a20ce97c70a7
+	queryGroup: Fact
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression inventory_barcode_convert =
+		let
+		    Source = SharePoint.Files("https://pgone.sharepoint.com/sites/ITPG", [ApiVersion = 15]),
+		    #"Filtered Rows" = Table.SelectRows(Source, each Text.Contains([Folder Path], "2. Smallbox SF Report") and Text.Contains([Folder Path], "Master Data Mapping")),
+		    #"Filtered Rows1" = Table.SelectRows(#"Filtered Rows", each ([Name] = "0.Mapping Sellout BHX Win.xlsx")),
+		    #"Filtered Hidden Files1" = Table.SelectRows(#"Filtered Rows1", each [Attributes]?[Hidden]? <> true),
+		    #"Invoke Custom Function1" = Table.AddColumn(#"Filtered Hidden Files1", "psku_inventory_product_mapping_transform_file", each #"psku_inventory_product_mapping_transform_file"([Content])),
+		    #"Renamed Columns1" = Table.RenameColumns(#"Invoke Custom Function1", {"Name", "Source.Name"}),
+		    #"Removed Other Columns1" = Table.SelectColumns(#"Renamed Columns1", {"Source.Name", "psku_inventory_product_mapping_transform_file"}),
+		    #"Expanded psku_inventory_product_mapping_transform_file" = Table.ExpandTableColumn(#"Removed Other Columns1", "psku_inventory_product_mapping_transform_file", {"Article code", "Barcode"}, {"Article code", "Barcode"}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Expanded psku_inventory_product_mapping_transform_file",{"Source.Name"}),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Removed Columns",{{"Barcode", type text}, {"Article code", type text}})
+		in
+		    #"Changed Type"
+	lineageTag: 074cab6c-3a84-4cc0-9882-22858d175bbf
+	queryGroup: Fact
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression psku_inventory_transform_file =
+		let
+		    Source = (Parameter2 as binary) => let
+		    Source = Excel.Workbook(Parameter2, null, true),
+		    Sheet1_Sheet = Source{[Item="Sheet1",Kind="Sheet"]}[Data],
+		    #"Promoted Headers" = Table.PromoteHeaders(Sheet1_Sheet, [PromoteAllScalars=true])
+		in
+		    #"Promoted Headers"
+		in
+		    Source
+	lineageTag: b56460de-8ce4-48f1-9484-88b57f8186b6
+	queryGroup: Fact
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Function
+
+expression psku_inventory_product_mapping_transform_file =
+		let
+		    Source = (Parameter3 as binary) => let
+		    Source = Excel.Workbook(Parameter3, null, true),
+		    mapping_Sheet = Source{[Item="mapping",Kind="Sheet"]}[Data],
+		    #"Promoted Headers" = Table.PromoteHeaders(mapping_Sheet, [PromoteAllScalars=true])
+		in
+		    #"Promoted Headers"
+		in
+		    Source
+	lineageTag: 8a8b0c32-a970-40ac-9ca8-4df5772b18b3
+	queryGroup: Fact
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Function
+
+expression fct_psku_inventory_WIN =
+		let
+		    Source = PowerPlatform.Dataflows(null),
+		    Workspaces = Source{[Id="Workspaces"]}[Data],
+		    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+		    #"5c16af39-f843-4e01-acbb-64027f4b034b" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="5c16af39-f843-4e01-acbb-64027f4b034b"]}[Data],
+		    #"POS Data (WM+)_" = #"5c16af39-f843-4e01-acbb-64027f4b034b"{[entity="POS Data (WM+)",version=""]}[Data],
+		    #"Changed Type" = Table.TransformColumnTypes(#"POS Data (WM+)_",{{"Revenue", Int64.Type}, {"Sales Quantity", Int64.Type}, {"Closing Quantity", Int64.Type}, {"Closing Value", Int64.Type}}),
+		    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type",{"Month", "Store code", "Store name", "Closing Quantity", "Barcode"}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns",{{"Barcode", "gtin_item"}, {"Closing Quantity", "inventory_qty"}, {"Store name", "store_name"}, {"Store code", "store_code"}, {"Month", "date"}}),
+		    #"Added Custom" = Table.AddColumn(#"Renamed Columns", "store_key", each "WCM_"&[store_code]),
+		    #"Removed Columns" = Table.RemoveColumns(#"Added Custom",{"store_code"}),
+		    #"Filtered Rows" = Table.SelectRows(#"Removed Columns", each [inventory_qty] <> null and [inventory_qty] <> ""),
+		    #"Filtered Rows1" = Table.SelectRows(#"Filtered Rows", each [inventory_qty] > 0)
+		in
+		    #"Filtered Rows1"
+	lineageTag: 871f7619-e260-4bb4-99fc-da0ff52d66d9
+	queryGroup: Fact
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression fct_psku_inventory_BHX =
+		let
+		    Source = SharePoint.Files("https://pgone.sharepoint.com/sites/ITPG", [ApiVersion = 15]),
+		    #"Filtered Rows" = Table.SelectRows(Source, each Text.Contains([Folder Path], "2. Smallbox SF Report") and Text.Contains([Folder Path], "Monthly Inventory BHX")),
+		    #"Filtered Hidden Files1" = Table.SelectRows(#"Filtered Rows", each [Attributes]?[Hidden]? <> true),
+		    #"Invoke Custom Function1" = Table.AddColumn(#"Filtered Hidden Files1", "psku_inventory_transform_file", each #"psku_inventory_transform_file"([Content])),
+		    #"Renamed Columns1" = Table.RenameColumns(#"Invoke Custom Function1", {"Name", "Source.Name"}),
+		    #"Removed Other Columns1" = Table.SelectColumns(#"Renamed Columns1", {"Source.Name", "psku_inventory_transform_file"}),
+		    #"Expanded psku_inventory_transform_file" = Table.ExpandTableColumn(#"Removed Other Columns1", "psku_inventory_transform_file", {"STORE_ID", "STORE_NAME", "PRODUCT_ID", "PRODUCT_NAME", "MODEL_NO", "MODEL_NAME", "SUBGROUP_NAME", "INVENTORY_QTY", "DATE"}, {"STORE_ID", "STORE_NAME", "PRODUCT_ID", "PRODUCT_NAME", "MODEL_NO", "MODEL_NAME", "SUBGROUP_NAME", "INVENTORY_QTY", "DATE"}),
+		    #"Filtered Rows1" = Table.SelectRows(#"Expanded psku_inventory_transform_file", each [PRODUCT_NAME] = "NƯỚC XẢ VẢI DOWNY TINH KHÔI TÚI 2.3L"),
+		    #"Removed Other Columns" = Table.SelectColumns(#"Filtered Rows1",{"DATE", "STORE_ID", "STORE_NAME", "PRODUCT_ID", "PRODUCT_NAME", "MODEL_NO", "MODEL_NAME", "SUBGROUP_NAME", "INVENTORY_QTY"}),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Removed Other Columns",{{"STORE_ID", type text}, {"PRODUCT_ID", type text}}),
+		    #"Added Custom" = Table.AddColumn(#"Changed Type", "store_key", each "BHX_"&[STORE_ID]),
+		    #"Added Custom1" = Table.AddColumn(#"Added Custom", "date", each Date.FromText(
+		        Text.End([DATE], 4) & "/" &
+		        Text.Middle([DATE], 3,2) & "/01"
+		    )),
+		    #"Removed Columns" = Table.RemoveColumns(#"Added Custom1",{"DATE", "MODEL_NO", "MODEL_NAME", "SUBGROUP_NAME", "STORE_ID"}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"STORE_NAME", "store_name"}, {"PRODUCT_ID", "gtin_item"}, {"PRODUCT_NAME", "gtin_name"}, {"INVENTORY_QTY", "inventory_qty"}}),
+		    #"Merged Queries" = Table.NestedJoin(#"Renamed Columns", {"gtin_item"}, inventory_barcode_convert, {"Article code"}, "inventory_barcode_convert", JoinKind.LeftOuter),
+		    #"Expanded inventory_barcode_convert" = Table.ExpandTableColumn(#"Merged Queries", "inventory_barcode_convert", {"Barcode"}, {"Barcode"}),
+		    #"Removed Columns1" = Table.RemoveColumns(#"Expanded inventory_barcode_convert",{"gtin_item"}),
+		    #"Renamed Columns2" = Table.RenameColumns(#"Removed Columns1",{{"Barcode", "gtin_item"}}),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Renamed Columns2",{{"inventory_qty", Int64.Type}}),
+		    #"Filtered Rows2" = Table.SelectRows(#"Changed Type1", each [inventory_qty] > 0)
+		in
+		    #"Filtered Rows2"
+	lineageTag: 9ded4406-9110-4ea6-8773-0b45bdae9201
+	queryGroup: Fact
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression qdgp_english_convert =
+		let
+		    Source = SharePoint.Files("https://pgone.sharepoint.com/sites/ITPG/", [ApiVersion = 15]),
+		    #"Filtered Rows" = Table.SelectRows(Source, each Text.Contains([Name], "QDGP")),
+		    #"QDGP_English xlsx_https://pgone sharepoint com/sites/ITPG/Shared Documents/Document/8  NEXA (IMPORTANT_DO NOT CHANGE)/QDGP-English Group Name/" = #"Filtered Rows"{[Name="QDGP_English.xlsx",#"Folder Path"="https://pgone.sharepoint.com/sites/ITPG/Shared Documents/Document/8. NEXA (IMPORTANT_DO NOT CHANGE)/QDGP-English Group Name/"]}[Content],
+		    #"Imported Excel Workbook" = Excel.Workbook(#"QDGP_English xlsx_https://pgone sharepoint com/sites/ITPG/Shared Documents/Document/8  NEXA (IMPORTANT_DO NOT CHANGE)/QDGP-English Group Name/"),
+		    Sheet1_Sheet = #"Imported Excel Workbook"{[Item="Sheet1",Kind="Sheet"]}[Data],
+		    #"Promoted Headers" = Table.PromoteHeaders(Sheet1_Sheet, [PromoteAllScalars=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"GroupName", type text}, {"English GroupName", type text}})
+		in
+		    #"Changed Type"
+	lineageTag: bfbbc97a-3ad8-4b70-9d48-db566b3a664f
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression pos_store_fulltime =
+		let
+		    Source = PowerPlatform.Dataflows(null),
+		    Workspaces = Source{[Id="Workspaces"]}[Data],
+		    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+		    #"1ffe30a5-2861-4d04-be0e-792078ccd005" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="1ffe30a5-2861-4d04-be0e-792078ccd005"]}[Data],
+		    #"MR_Smallbox_Store Master_" = #"1ffe30a5-2861-4d04-be0e-792078ccd005"{[entity="MR_Store Master",version=""]}[Data],
+		    #"Split Column by Delimiter" = Table.SplitColumn(#"MR_Smallbox_Store Master_", "Source.Name", Splitter.SplitTextByEachDelimiter({"-"}, QuoteStyle.Csv, false), {"Source.Name.1", "Source.Name.2"}),
+		    #"Split Column by Delimiter1" = Table.SplitColumn(#"Split Column by Delimiter", "Source.Name.2", Splitter.SplitTextByEachDelimiter({"."}, QuoteStyle.Csv, false), {"Source.Name.2.1", "Source.Name.2.2"}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Split Column by Delimiter1",{"Source.Name.1", "Source.Name.2.2"}),
+		    #"Trimmed Text" = Table.TransformColumns(#"Removed Columns",{{"Source.Name.2.1", Text.Trim, type text}}),
+		    #"Added Prefix" = Table.TransformColumns(#"Trimmed Text", {{"Source.Name.2.1", each "20" & _, type text}}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Added Prefix",{{"Source.Name.2.1", "YearMonth"}}),
+		    #"Split Column by Position" = Table.SplitColumn(#"Renamed Columns", "YearMonth", Splitter.SplitTextByPositions({0, 4}, false), {"YearMonth.1", "YearMonth.2"}),
+		    #"Merged Columns" = Table.CombineColumns(#"Split Column by Position",{"YearMonth.1", "YearMonth.2"},Combiner.CombineTextByDelimiter("M", QuoteStyle.None),"YearMonth"),
+		    #"Removed Other Columns" = Table.SelectColumns(#"Merged Columns",{"YearMonth", "Agency", "SFDC Code", "Sellout Code", "Account Name", "Segmentation"}),
+		    #"Added Conditional Column" = Table.AddColumn(#"Removed Other Columns", "Custom", each if [Agency] = "AEON" then "Aeon" else if [Agency] = "MM MEGA" then "Mega Market" else if [Agency] = "CRV" then "CRV" else if [Agency] = "LOTTE" then "Lotte" else if [Agency] = "SGC" then "Coop" else if [Agency] = "EMART" then "Emart" else if [Agency] = "BHX" then "Bach Hoa Xanh" else if [Agency] = "WCM" then "Winmart" else if [Agency] = "North Balance" then "North balance" else if [Agency] = "South Balance" then "South balance" else [Agency]),
+		    #"Removed Columns1" = Table.RemoveColumns(#"Added Conditional Column",{"Agency"}),
+		    #"Renamed Columns1" = Table.RenameColumns(#"Removed Columns1",{{"Account Name", "store_name"}, {"Custom", "sub_channel"}, {"Segmentation", "local_segment"}, {"YearMonth", "year_month"}, {"SFDC Code", "store_id"}}),
+		    #"Trimmed Text1" = Table.TransformColumns(#"Renamed Columns1",{{"Sellout Code", Text.Trim, type text}}),
+		    #"Uppercased Text" = Table.TransformColumns(#"Trimmed Text1",{{"Sellout Code", Text.Upper, type text}}),
+		    #"Renamed Columns2" = Table.RenameColumns(#"Uppercased Text",{{"Sellout Code", "store_code"}, {"store_name", "customer"}})
+		in
+		    #"Renamed Columns2"
+	lineageTag: 8ca63f40-fce5-4a34-98c0-e7f5be3d73f5
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression pos_store_mapping =
+		let
+		    Source = PowerPlatform.Dataflows(null),
+		    Workspaces = Source{[Id="Workspaces"]}[Data],
+		    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+		    #"d548f9ca-4b55-4ade-8416-29502998f4a1" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="d548f9ca-4b55-4ade-8416-29502998f4a1"]}[Data],
+		    pos_store_mapping_ = #"d548f9ca-4b55-4ade-8416-29502998f4a1"{[entity="pos_store_mapping",version=""]}[Data]
+		in
+		    pos_store_mapping_
+	lineageTag: bf80e66d-08ec-4be9-bf4b-f76b65ab82a7
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression dim_sfdc_store =
+		let
+		    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+		    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+		    nexa_msv_workbench_gold_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench_gold",Kind="Schema"]}[Data],
+		    vn_store_sfdc_dim_Table = nexa_msv_workbench_gold_Schema{[Name="vn_store_sfdc_dim",Kind="Table"]}[Data],
+		    #"Changed Type" = Table.TransformColumnTypes(vn_store_sfdc_dim_Table,{{"store_id", type text}, {"store_code", type text}, {"country", type text}, {"own_cust_id", type text}, {"site_name", type text}, {"pos_store_code", type text}, {"site_type_name", type text}, {"cluster_name", type text}, {"active_status", type text}, {"banner", type text}, {"channel_name", type text}, {"sub_channel_name", type text}, {"address", type text}, {"agency", type text}, {"customer_name", type text}, {"distributor_name", type text}, {"type", type text}}),
+		    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type",{"store_id", "store_code", "site_type_name", "cluster_name", "banner"}),
+		    #"Replaced Value" = Table.ReplaceValue(#"Removed Other Columns"," ","",Replacer.ReplaceText,{"store_code"}),
+		    #"Merged Queries" = Table.NestedJoin(#"Replaced Value", {"store_id"}, pos_store_mapping, {"sfdc_code"}, "pos_store", JoinKind.LeftOuter),
+		    #"Expanded pos_store" = Table.ExpandTableColumn(#"Merged Queries", "pos_store", {"sfdc_code", "indirect_code", "pos_code", "store_name", "local_segment", "sub_channel"}, {"sfdc_code", "indirect_code", "pos_code", "store_name", "local_segment", "sub_channel"}),
+		    #"Removed Other Columns1" = Table.SelectColumns(#"Expanded pos_store",{"store_id", "site_type_name", "banner", "indirect_code", "local_segment", "sub_channel"}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns1",{{"banner", "customer"}, {"indirect_code", "store_code"}, {"store_id", "pr_key"}})
+		in
+		    #"Renamed Columns"
+	lineageTag: 997411df-5a49-44cd-b91a-47a78fd95592
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression dim_pos_store_sfdc =
+		let
+		    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+		    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+		    nexa_msv_workbench_gold_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench_gold",Kind="Schema"]}[Data],
+		    vn_store_sfdc_dim_Table = nexa_msv_workbench_gold_Schema{[Name="vn_store_sfdc_dim",Kind="Table"]}[Data],
+		    #"Changed Type" = Table.TransformColumnTypes(vn_store_sfdc_dim_Table,{{"store_id", type text}, {"store_code", type text}, {"country", type text}, {"own_cust_id", type text}, {"site_name", type text}, {"pos_store_code", type text}, {"site_type_name", type text}, {"cluster_name", type text}, {"active_status", type text}, {"banner", type text}, {"channel_name", type text}, {"sub_channel_name", type text}, {"address", type text}, {"agency", type text}, {"customer_name", type text}, {"distributor_name", type text}, {"type", type text}}),
+		    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type",{"store_id", "store_code", "site_type_name", "cluster_name", "banner"}),
+		    #"Merged Queries" = Table.NestedJoin(#"Removed Other Columns", {"store_id"}, pos_store_mapping, {"sfdc_code"}, "pos_store", JoinKind.LeftOuter),
+		    #"Expanded pos_store" = Table.ExpandTableColumn(#"Merged Queries", "pos_store", {"sfdc_code", "indirect_code", "pos_code", "store_name", "local_segment", "sub_channel"}, {"sfdc_code", "indirect_code", "pos_code", "store_name", "local_segment", "sub_channel"}),
+		    #"Removed Other Columns2" = Table.SelectColumns(#"Expanded pos_store",{"store_code", "store_id", "sub_channel", "local_segment"}),
+		    #"Filtered Rows" = Table.SelectRows(#"Removed Other Columns2", each [sub_channel] <> null and [sub_channel] <> ""),
+		    #"Removed Duplicates" = Table.Distinct(#"Filtered Rows", {"store_code"}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Removed Duplicates",{{"store_code", "pr_key"}}),
+		    #"Uppercased Text" = Table.TransformColumns(#"Renamed Columns",{{"pr_key", Text.Upper, type text}})
+		in
+		    #"Uppercased Text"
+	lineageTag: 35971e2e-4b34-4235-ad68-e384aa5d8b54
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression share_value_fct_hsm_total =
+		let
+		    Source = PowerPlatform.Dataflows(null),
+		    Workspaces = Source{[Id="Workspaces"]}[Data],
+		    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+		    #"934b22e1-2689-4819-909c-2852e0ec364f" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="934b22e1-2689-4819-909c-2852e0ec364f"]}[Data],
+		    vn_hsm_value_share_fct_ = #"934b22e1-2689-4819-909c-2852e0ec364f"{[entity="vn_hsm_value_share_fct",version=""]}[Data],
+		    #"Changed Type" = Table.TransformColumnTypes(vn_hsm_value_share_fct_,{{"Total", Int64.Type}}),
+		    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type",{"Month", "Customer", "Category (modified)", "Total"}),
+		    #"Added Conditional Column" = Table.AddColumn(#"Removed Other Columns", "customer", each if Text.Contains([Customer], "AEON") then "Aeon" else if Text.Contains([Customer], "Coop") then "Coop" else if Text.Contains([Customer], "CRV") then "CRV" else if Text.Contains([Customer], "EMART") then "Emart" else if Text.Contains([Customer], "LOTTE") then "Lotte" else if Text.Contains([Customer], "Mega") then "Mega Market" else "Others"),
+		    #"Removed Columns" = Table.RemoveColumns(#"Added Conditional Column",{"Customer"}),
+		    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"Month", "date"}, {"Category (modified)", "category"}, {"Total", "value"}})
+		in
+		    #"Renamed Columns"
+	lineageTag: f12e8692-ea51-4a2b-855f-bcc06c240279
+	queryGroup: Fact
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression 'VN_Product Hierarchy Mapping_Datahub_SFDC_IR' =
+		let
+		    Source = PowerPlatform.Dataflows(null),
+		    Workspaces = Source{[Id="Workspaces"]}[Data],
+		    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+		    #"1743907b-2c95-443e-85ee-40cf19cb96d0" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="1743907b-2c95-443e-85ee-40cf19cb96d0"]}[Data],
+		    Query_ = #"1743907b-2c95-443e-85ee-40cf19cb96d0"{[entity="Query",version=""]}[Data],
+		    #"Uppercased Text" = Table.TransformColumns(Query_,{{"Brand_Original", Text.Upper, type text}}),
+		    #"Removed Duplicates" = Table.Distinct(#"Uppercased Text", {"Data source", "Category_Original", "Brand_Original", "Category_Shipment", "Brand_Shipment"}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Removed Duplicates",{"VN_Product Hierarchy Mapping_Datahub_SFDC_IR.xlsx"}),
+		    #"Capitalized Each Word" = Table.TransformColumns(#"Removed Columns",{{"Category_Original", Text.Proper, type text}, {"Brand_Original", Text.Proper, type text}, {"Category_Shipment", Text.Proper, type text}, {"Brand_Shipment", Text.Proper, type text}}),
+		    #"Added Custom" = Table.AddColumn(#"Capitalized Each Word", "category_brand", each [Category_Original]&[Brand_Original]),
+		    #"Filtered Rows" = Table.SelectRows(#"Added Custom", each ([Data source] = "IR"))
+		in
+		    #"Filtered Rows"
+	lineageTag: a1d31de3-7dea-444d-925c-72afd4408827
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression 'VN_Product Hierarchy Mapping_Datahub_SFDC_SFDC' =
+		let
+		    Source = PowerPlatform.Dataflows(null),
+		    Workspaces = Source{[Id="Workspaces"]}[Data],
+		    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+		    #"1743907b-2c95-443e-85ee-40cf19cb96d0" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="1743907b-2c95-443e-85ee-40cf19cb96d0"]}[Data],
+		    Query_ = #"1743907b-2c95-443e-85ee-40cf19cb96d0"{[entity="Query",version=""]}[Data],
+		    #"Uppercased Text" = Table.TransformColumns(Query_,{{"Brand_Original", Text.Upper, type text}}),
+		    #"Removed Duplicates" = Table.Distinct(#"Uppercased Text", {"Data source", "Category_Original", "Brand_Original", "Category_Shipment", "Brand_Shipment"}),
+		    #"Removed Columns" = Table.RemoveColumns(#"Removed Duplicates",{"VN_Product Hierarchy Mapping_Datahub_SFDC_IR.xlsx"}),
+		    #"Capitalized Each Word" = Table.TransformColumns(#"Removed Columns",{{"Category_Original", Text.Proper, type text}, {"Brand_Original", Text.Proper, type text}, {"Category_Shipment", Text.Proper, type text}, {"Brand_Shipment", Text.Proper, type text}}),
+		    #"Added Custom" = Table.AddColumn(#"Capitalized Each Word", "category_brand", each [Category_Original]&[Brand_Original]),
+		    #"Filtered Rows" = Table.SelectRows(#"Added Custom", each ([Data source] = "SFDC")),
+		    #"Removed Other Columns" = Table.SelectColumns(#"Filtered Rows",{"Category_Original", "Category_Shipment"}),
+		    #"Removed Duplicates1" = Table.Distinct(#"Removed Other Columns")
+		in
+		    #"Removed Duplicates1"
+	lineageTag: 63ed00e1-f1f8-4cd6-bec2-0b8499bc04c5
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression dim_indirect_store_do =
+		let
+		    Source = Value.NativeQuery(Databricks.Catalogs("adb-1405689875182560.0.azuredatabricks.net", "sql/protocolv1/o/1405689875182560/0428-061324-1bphpcbr", [Catalog="cdl_amhq_prod", Database=null, EnableAutomaticProxyDiscovery=null, Implementation=null]){[Name="cdl_amhq_prod",Kind="Database"]}[Data], "SELECT DISTINCT#(lf)    store_name                                                AS customer,#(lf)    UPPER(TRIM(source_store_id))                             AS store_code,#(lf)    CASE #(lf)        WHEN sub_channel_name = 'DIRECT TO CONSUMER ECOMMERCE' THEN 'Ecom'#(lf)        ELSE do_channel #(lf)    END                                                       AS sub_channel,#(lf)    branch_id,#(lf)    local_customer_name,#(lf)    store_id                                                  AS pr_key,#(lf)    seller_id,#(lf)    CONCAT(distributor_region, '_', distributor_local_channel_name) AS region_localchannel#(lf)FROM cdl_amhq_prod.nexa_msv_workbench_gold.vn_do_store_mapping_vw", null, [EnableFolding=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(Source,{{"pr_key", type text}})
+		in
+		    #"Changed Type"
+	lineageTag: b48966f7-0893-4cdd-a905-9a12aa21fea6
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression dim_indirect_store_smallbox =
+		let
+		    Source = Value.NativeQuery(Databricks.Catalogs("adb-1405689875182560.0.azuredatabricks.net", "sql/protocolv1/o/1405689875182560/0428-061324-1bphpcbr", [Catalog="cdl_amhq_prod", Database=null, EnableAutomaticProxyDiscovery=null, Implementation=null]){[Name="cdl_amhq_prod",Kind="Database"]}[Data], "SELECT#(lf)    CAST(store_id AS STRING)   AS pr_key,#(lf)    store_code,#(lf)    store_name,#(lf)    distributor_local_channel_name,#(lf)    local_channel_grouping_1,#(lf)    local_channel_grouping_2,#(lf)    local_channel_grouping_3,#(lf)    distributor_region,#(lf)    channel_name,#(lf)    sub_channel_name,#(lf)    CAST(cust_key AS STRING)   AS cust_key,#(lf)    distributor_branch_name#(lf)FROM cdl_amhq_prod.nexa_msv_workbench_gold.vn_store_dim#(lf)WHERE#(lf)    sub_channel_name = 'CONVENIENCE STORE (HFS)'#(lf)    OR (sub_channel_name = 'DRUG/ PHARMACY RETAIL'      AND distributor_local_channel_name = 'PHR')#(lf)    OR sub_channel_name = 'LARGE MINI-MARKET (HFS)'#(lf)    OR sub_channel_name = 'SMALL MINI-MARKET (HFS)'#(lf)    OR sub_channel_name = 'SUPERMARKET'#(lf)    OR (sub_channel_name = 'UNKNOWN - ALL OTHER RETAIL'  AND distributor_local_channel_name = 'H&B')", null, [EnableFolding=true]),
+		    #"Merged Queries" = Table.NestedJoin(Source, {"store_code"}, dim_smallbox_mapping, {"store_code"}, "dim_smallbox_mapping", JoinKind.LeftOuter),
+		    #"Expanded dim_smallbox_mapping" = Table.ExpandTableColumn(#"Merged Queries", "dim_smallbox_mapping", {"store_name", "local_segment", "customer", "sub_channel"}, {"store_name.1", "local_segment", "customer", "sub_channel"}),
+		    #"Filtered Rows" = Table.SelectRows(#"Expanded dim_smallbox_mapping", each [sub_channel] <> null and [sub_channel] <> ""),
+		    #"Removed Other Columns" = Table.SelectColumns(#"Filtered Rows",{"pr_key", "store_code", "store_name", "sub_channel_name", "local_segment", "customer", "sub_channel"})
+		in
+		    #"Removed Other Columns"
+	lineageTag: 67285302-f0d7-439a-a4df-f31b1186914a
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression dim_smallbox_mapping =
+		let
+		    Source = PowerPlatform.Dataflows(null),
+		    Workspaces = Source{[Id="Workspaces"]}[Data],
+		    #"d5309721-c5fc-4d37-924d-0b134d285358" = Workspaces{[workspaceId="d5309721-c5fc-4d37-924d-0b134d285358"]}[Data],
+		    #"d548f9ca-4b55-4ade-8416-29502998f4a1" = #"d5309721-c5fc-4d37-924d-0b134d285358"{[dataflowId="d548f9ca-4b55-4ade-8416-29502998f4a1"]}[Data],
+		    dim_smallbox_mapping_ = #"d548f9ca-4b55-4ade-8416-29502998f4a1"{[entity="dim_smallbox_mapping",version=""]}[Data]
+		in
+		    dim_smallbox_mapping_
+	lineageTag: a3b242f6-1681-47ae-a110-1b93a3a13670
+	queryGroup: Dimension
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

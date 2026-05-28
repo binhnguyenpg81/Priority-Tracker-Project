@@ -1,0 +1,86 @@
+table vn_indirect_target_distributor_seller
+	lineageTag: f64178b8-5cc0-4e1f-be93-7df303da0aa7
+
+	column year_month
+		dataType: string
+		lineageTag: 59449ee1-1c6e-4548-84bd-1e9b24a1706f
+		summarizeBy: none
+		sourceColumn: year_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column corp_distributor_branch_id
+		dataType: string
+		lineageTag: b641fbec-882a-4573-af48-2682fc649f5b
+		summarizeBy: none
+		sourceColumn: corp_distributor_branch_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_code
+		dataType: string
+		lineageTag: e00100d1-d8d3-4029-b89e-5cfeca76ad25
+		summarizeBy: none
+		sourceColumn: seller_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column GreenlineType
+		dataType: string
+		lineageTag: 9f0da0d5-1b7f-4d66-ac10-c047c40cb2f3
+		summarizeBy: none
+		sourceColumn: GreenlineType
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value
+		dataType: double
+		formatString: 0
+		lineageTag: d739cd14-f873-4d36-968a-b39df1567e26
+		summarizeBy: sum
+		sourceColumn: Value
+
+		annotation SummarizationSetBy = Automatic
+
+	column greenline_key = vn_indirect_target_distributor_seller[corp_distributor_branch_id] & vn_indirect_target_distributor_seller[seller_code] & vn_indirect_target_distributor_seller[GreenlineType] & vn_indirect_target_distributor_seller[year_month]
+		lineageTag: bd881daa-e8a8-4723-8d30-dd3467149d54
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column date = DATE(LEFT(vn_indirect_target_distributor_seller[year_month],4), RIGHT(vn_indirect_target_distributor_seller[year_month],2),1)
+		formatString: Short Date
+		lineageTag: bbd048de-f9f9-47c9-8a80-c6abd2af2362
+		summarizeBy: none
+
+		variation Variation
+			isDefault
+			relationship: 4aca4e04-98d6-4d88-a6d4-bf811f80bc28
+			defaultHierarchy: LocalDateTable_315cf2b0-ed86-41e7-91bc-2445d2cfedd8.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vn_indirect_target_distributor_seller = m
+		mode: import
+		queryGroup: Fact
+		source =
+				let
+				    Source = Databricks.Catalogs(#"Prod Server", #"Prod HTTP Path", [Catalog=null, Database=null, EnableAutomaticProxyDiscovery=null]),
+				    cdl_amhq_prod_Database = Source{[Name = "cdl_amhq_prod",Kind="Database"]}[Data],
+				    nexa_msv_workbench_gold_Schema = cdl_amhq_prod_Database{[Name="nexa_msv_workbench_gold",Kind="Schema"]}[Data],
+				    vn_indirect_target_distributor_seller_Table = nexa_msv_workbench_gold_Schema{[Name="vn_indirect_target_distributor_seller",Kind="Table"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(vn_indirect_target_distributor_seller_Table,{"year_month", "corp_distributor_id", "corp_distributor_branch_id", "local_branch_code", "seller_code", "supervisor_code", "class_name", "greenline1_distribution", "greenline2_distribution", "greenline3_distribution", "greenline4_distribution", "greenline5_distribution"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns",{{"greenline1_distribution", "Greenline 1"}, {"greenline2_distribution", "Greenline 2"}, {"greenline3_distribution", "Greenline 3"}, {"greenline4_distribution", "Greenline 4"}, {"greenline5_distribution", "Greenline 5"}}),
+				    #"Unpivoted Other Columns" = Table.UnpivotOtherColumns(#"Renamed Columns", {"year_month", "corp_distributor_id", "corp_distributor_branch_id", "local_branch_code", "seller_code", "supervisor_code", "class_name"}, "GreenlineType", "Value"),
+				    #"Removed Other Columns1" = Table.SelectColumns(#"Unpivoted Other Columns",{"year_month", "corp_distributor_branch_id", "seller_code", "GreenlineType", "Value"}),
+				    #"Filtered Rows" = Table.SelectRows(#"Removed Other Columns1", each ([corp_distributor_branch_id] <> "#N/A")),
+				    #"Filtered Rows1" = Table.SelectRows(#"Filtered Rows", each [seller_code] <> "0"),
+				    #"Filtered Rows2" = Table.SelectRows(#"Filtered Rows1", each [Value] <> 0),
+				    #"Grouped Rows" = Table.Group(#"Filtered Rows2", {"year_month", "corp_distributor_branch_id", "seller_code", "GreenlineType"}, {{"Value", each List.Sum([Value]), type number}})
+				in
+				    #"Grouped Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
